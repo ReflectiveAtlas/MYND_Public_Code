@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      overflow: hidden;
+    }
+    
+    #container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    #canvas-container {
+      flex: 3;
+      position: relative;
+    }
+    
+    #info-panel {
+      flex: 1;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+      max-width: 350px;
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    
+    h2 {
+      color: #2c3e50;
+      margin-top: 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+    
+    .control-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f0f4f8;
+      border-radius: 8px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    button {
+      background-color: #4a69bd;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #1e3799;
+    }
+    
+    .data-display {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f0f4f8;
+      border-radius: 8px;
+    }
+    
+    .metrics {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .metric-box {
+      text-align: center;
+      background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+      padding: 8px;
+      border-radius: 4px;
+      flex: 1;
+      margin: 0 5px;
+    }
+    
+    .metric-box:first-child {
+      margin-left: 0;
+    }
+    
+    .metric-box:last-child {
+      margin-right: 0;
+    }
+    
+    .metric-value {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    
+    .agent-status {
+      margin-top: 20px;
+      background-color: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    .agent-controls {
+      margin-top: 10px;
+    }
+    
+    .research-notes {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #555;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-idle {
+      background-color: #90caf9;
+    }
+    
+    .status-processing {
+      background-color: #4fc3f7;
+    }
+    
+    .status-deciding {
+      background-color: #ffb74d;
+    }
+    
+    .status-moving {
+      background-color: #ff8a65;
+    }
+    
+    .readiness-potential {
+      margin-top: 15px;
+      height: 120px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      border-radius: 4px;
+      position: relative;
+    }
+    
+    #rp-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .rp-markers {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 10px;
+      font-size: 11px;
+      color: #666;
+    }
+    
+    .decision-matrix {
+      margin-top: 15px;
+      background-color: #fff;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+    
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1px;
+      background-color: #ddd;
+    }
+    
+    .matrix-cell {
+      background-color: #fff;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .matrix-cell.active {
+      background-color: #bbdefb;
+    }
+    
+    .matrix-cell.selected:after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 2px solid #f44336;
+      pointer-events: none;
+    }
+    
+    .legend {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+      margin-bottom: 5px;
+    }
+    
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      margin-right: 5px;
+      border-radius: 3px;
+    }
+    
+    .log-container {
+      margin-top: 15px;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #263238;
+      color: #eceff1;
+      font-family: monospace;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .log-entry {
+      margin-bottom: 3px;
+      padding-bottom: 3px;
+      border-bottom: 1px solid #37474f;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <canvas id="modelCanvas"></canvas>
+    </div>
+    <div id="info-panel">
+      <h2>Libet Consciousness Model</h2>
+      
+      <div class="control-group">
+        <label for="container1">Container 1 Objects (1-5):</label>
+        <input type="number" id="container1" min="1" max="5" value="3">
+        
+        <label for="container2">Container 2 Objects (1-5):</label>
+        <input type="number" id="container2" min="1" max="5" value="2">
+        
+        <label for="uncertainty">Quantum Uncertainty:</label>
+        <input type="range" id="uncertainty" min="0" max="1" step="0.1" value="0.3">
+        <span id="uncertainty-value">0.3</span>
+        
+        <button id="apply-btn">Update Environment</button>
+        <button id="reset-btn">Reset Simulation</button>
+      </div>
+      
+      <div class="agent-status">
+        <h3>Autonomous Agent</h3>
+        <div>
+          <span class="status-indicator status-idle" id="agent-status-indicator"></span>
+          <span id="agent-status-text">Idle</span>
+        </div>
+        
+        <div class="agent-controls">
+          <button id="start-agent-btn">Start Agent Decision Process</button>
+        </div>
+        
+        <div class="readiness-potential">
+          <canvas id="rp-canvas"></canvas>
+        </div>
+        <div class="rp-markers">
+          <span>-800ms</span>
+          <span>-600ms</span>
+          <span>-400ms</span>
+          <span>-200ms</span>
+          <span>Action</span>
+        </div>
+        
+        <h4>Decision Matrix (3×3)</h4>
+        <div class="decision-matrix">
+          <div class="matrix-grid" id="decision-matrix">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+      
+      <div class="data-display">
+        <h3>Simulation Metrics</h3>
+        <div class="metrics">
+          <div class="metric-box">
+            <div>Coherence</div>
+            <div id="coherence" class="metric-value">0.00</div>
+          </div>
+          <div class="metric-box">
+            <div>Dwell Time</div>
+            <div id="dwell-time" class="metric-value">0 ms</div>
+          </div>
+        </div>
+        <div class="metrics">
+          <div class="metric-box">
+            <div>Sources</div>
+            <div id="sources" class="metric-value">0</div>
+          </div>
+          <div class="metric-box">
+            <div>Sinks</div>
+            <div id="sinks" class="metric-value">0</div>
+          </div>
+        </div>
+        
+        <h3>Current State</h3>
+        <div id="current-state">Initialization</div>
+        
+        <div class="legend">
+          <h4>Legend:</h4>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #4a69bd;"></div>
+            <div>Source</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #eb4d4b;"></div>
+            <div>Sink</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #f6b93b;"></div>
+            <div>Wave Front</div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #1e88e5;"></div>
+            <div>Agent</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="log-container" id="log-container">
+        <div class="log-entry">System initialized.</div>
+      </div>
+      
+      <div class="research-notes">
+        <h3>Research Integration</h3>
+        <p>This model integrates Libet's readiness potential experiment (1983) with Global Workspace Theory and metastable brain waves.</p>
+        <ul>
+          <li>Readiness potential begins ~800ms before action</li>
+          <li>Conscious awareness occurs ~200ms before action</li>
+          <li>Neural decision precedes conscious awareness</li>
+          <li>The 3×3 decision matrix represents the "intention space"</li>
+          <li>Wave propagation represents the "traveling patterns of neuronal activity"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Global variables
+    let scene, camera, renderer;
+    let gridHelper, grid3D = [];
+    const gridSize = 25;
+    let container1Objects = [];
+    let container2Objects = [];
+    let activeSources = [];
+    let activeSinks = [];
+    let waves = [];
+    let simulationTime = 0;
+    let currentDwellTime = 0;
+    let currentState = "initialization";
+    let previousState = "";
+    let stateStartTime = 0;
+    let coherenceValue = 0;
+    
+    // Agent variables
+    let agentMesh;
+    let agentState = "idle"; // idle, processing, deciding, moving
+    let agentStart = { x: gridSize/2, y: gridSize/2, z: gridSize/2 };
+    
+    // Libet experiment variables
+    const libetParams = {
+      rpOnsetTime: -800, // Readiness potential onset (ms before action)
+      awarenessTime: -200, // Conscious awareness time (ms before action)
+      actionTime: 0, // Time of action execution
+      currentTime: -1000, // Current time in decision sequence
+      decisionMade: false, // Whether a neural decision has been made
+      awareOfDecision: false, // Whether agent is aware of decision
+      targetContainer: null, // Target selected by readiness potential
+      decisionMatrix: [
+        [1, 2, 1],
+        [2, 3, 2],
+        [1, 2, 1]
+      ],
+      matrixPosition: {row: 1, col: 1} // Current focus in decision matrix
+    };
+    
+    // Configuration
+    const config = {
+      container1Count: 3,
+      container2Count: 2,
+      uncertainty: 0.3,
+      waveSpeed: 1.0,
+      wavelength: 0.5
+    };
+    
+    // Initialize Three.js scene
+    function init() {
+      // Create scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf5f7fa);
+      
+      // Create camera
+      const aspect = window.innerWidth / window.innerHeight;
+      camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
+      camera.position.set(gridSize, gridSize, gridSize * 1.5);
+      camera.lookAt(gridSize / 2, gridSize / 2, gridSize / 2);
+      
+      // Create renderer
+      const canvas = document.getElementById('modelCanvas');
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      
+      // Add grid helper
+      gridHelper = new THREE.GridHelper(gridSize, gridSize);
+      scene.add(gridHelper);
+      
+      // Create 3D grid points (invisible initially)
+      createGrid();
+      
+      // Add ambient light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      
+      // Add directional light
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(gridSize, gridSize * 2, gridSize);
+      scene.add(directionalLight);
+      
+      // Create containers
+      createContainers();
+      
+      // Create agent
+      createAgent();
+      
+      // Initialize objects in containers
+      updateContainers();
+      
+      // Create decision matrix UI
+      createDecisionMatrix();
+      
+      // Initialize readiness potential canvas
+      initReadinessPotential();
+      
+      // Update UI values
+      document.getElementById('container1').value = config.container1Count;
+      document.getElementById('container2').value = config.container2Count;
+      document.getElementById('uncertainty').value = config.uncertainty;
+      document.getElementById('uncertainty-value').textContent = config.uncertainty;
+      
+      // Event listeners for UI controls
+      document.getElementById('uncertainty').addEventListener('input', function() {
+        document.getElementById('uncertainty-value').textContent = this.value;
+        config.uncertainty = parseFloat(this.value);
+      });
+      
+      document.getElementById('apply-btn').addEventListener('click', applySettings);
+      document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+      document.getElementById('start-agent-btn').addEventListener('click', startAgentDecision);
+      
+      // Start animation loop
+      animate();
+      
+      // Log
+      logMessage("System initialized and ready.");
+    }
+    
+    // Create the 3D grid points
+    function createGrid() {
+      // Create grid and points
+      for (let x = 0; x < gridSize; x++) {
+        grid3D[x] = [];
+        for (let y = 0; y < gridSize; y++) {
+          grid3D[x][y] = [];
+          for (let z = 0; z < gridSize; z++) {
+            // Create invisible point at each grid position
+            const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const material = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.0 });
+            const point = new THREE.Mesh(geometry, material);
+            point.position.set(x, y, z);
+            point.userData = {
+              type: 'grid',
+              state: 'inactive',
+              x: x,
+              y: y,
+              z: z
+            };
+            scene.add(point);
+            grid3D[x][y][z] = point;
+          }
+        }
+      }
+    }
+    
+    // Create container boundaries
+    function createContainers() {
+      // Container 1: Left side
+      const container1Geometry = new THREE.BoxGeometry(gridSize/3, gridSize/3, gridSize/3);
+      const container1Material = new THREE.MeshBasicMaterial({ 
+        color: 0x4a69bd, 
+        transparent: true, 
+        opacity: 0.2,
+        wireframe: true
+      });
+      const container1 = new THREE.Mesh(container1Geometry, container1Material);
+      container1.position.set(gridSize/6, gridSize/2, gridSize/2);
+      scene.add(container1);
+      
+      // Container 2: Right side
+      const container2Geometry = new THREE.BoxGeometry(gridSize/3, gridSize/3, gridSize/3);
+      const container2Material = new THREE.MeshBasicMaterial({ 
+        color: 0xeb4d4b, 
+        transparent: true, 
+        opacity: 0.2,
+        wireframe: true
+      });
+      const container2 = new THREE.Mesh(container2Geometry, container2Material);
+      container2.position.set(gridSize - gridSize/6, gridSize/2, gridSize/2);
+      scene.add(container2);
+    }
+    
+    // Create agent
+    function createAgent() {
+      // Create agent body (sphere)
+      const geometry = new THREE.SphereGeometry(0.8, 16, 16);
+      const material = new THREE.MeshPhongMaterial({ 
+        color: 0x1e88e5,
+        emissive: 0x0d47a1,
+        emissiveIntensity: 0.3
+      });
+      
+      agentMesh = new THREE.Mesh(geometry, material);
+      agentMesh.position.set(agentStart.x, agentStart.y, agentStart.z);
+      scene.add(agentMesh);
+      
+      // Add "brain" visualization inside agent
+      const brainGeometry = new THREE.SphereGeometry(0.4, 8, 8);
+      const brainMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xff6f61,
+        transparent: true,
+        opacity: 0.7
+      });
+      
+      const brain = new THREE.Mesh(brainGeometry, brainMaterial);
+      agentMesh.add(brain);
+      
+      // Add neural activity visualizations (neurons)
+      for (let i = 0; i < 20; i++) {
+        const size = Math.random() * 0.1 + 0.05;
+        const neuronGeometry = new THREE.SphereGeometry(size, 4, 4);
+        const neuronMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0xffff00,
+          transparent: true,
+          opacity: 0
+        });
+        
+        const neuron = new THREE.Mesh(neuronGeometry, neuronMaterial);
+        
+        // Random position within brain
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * Math.PI;
+        const radius = Math.random() * 0.3;
+        
+        neuron.position.x = radius * Math.sin(phi) * Math.cos(theta);
+        neuron.position.y = radius * Math.sin(phi) * Math.sin(theta);
+        neuron.position.z = radius * Math.cos(phi);
+        
+        neuron.userData = {
+          initialPos: neuron.position.clone(),
+          pulseSpeed: Math.random() * 0.1 + 0.05,
+          active: false
+        };
+        
+        brain.add(neuron);
+      }
+    }
+    
+    // Update container objects based on count
+    function updateContainers() {
+      // Remove existing objects
+      container1Objects.forEach(obj => scene.remove(obj));
+      container2Objects.forEach(obj => scene.remove(obj));
+      container1Objects = [];
+      container2Objects = [];
+      
+      // Create new objects for Container 1
+      for (let i = 0; i < config.container1Count; i++) {
+        const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+        const material = new THREE.MeshPhongMaterial({ color: 0x78e08f });
+        const sphere = new THREE.Mesh(geometry, material);
+        
+        // Position within container 1
+        sphere.position.set(
+          (gridSize/6) + (Math.random() * gridSize/3 - gridSize/6),
+          (gridSize/2) + (Math.random() * gridSize/3 - gridSize/6),
+          (gridSize/2) + (Math.random() * gridSize/3 - gridSize/6)
+        );
+        
+        sphere.userData = {
+          type: 'object',
+          container: 1,
+          id: i
+        };
+        
+        scene.add(sphere);
+        container1Objects.push(sphere);
+      }
+      
+      // Create new objects for Container 2
+      for (let i = 0; i < config.container2Count; i++) {
+        const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+        const material = new THREE.MeshPhongMaterial({ color: 0x78e08f });
+        const sphere = new THREE.Mesh(geometry, material);
+        
+        // Position within container 2
+        sphere.position.set(
+          (gridSize - gridSize/6) + (Math.random() * gridSize/3 - gridSize/6),
+          (gridSize/2) + (Math.random() * gridSize/3 - gridSize/6),
+          (gridSize/2) + (Math.random() * gridSize/3 - gridSize/6)
+        );
+        
+        sphere.userData = {
+          type: 'object',
+          container: 2,
+          id: i
+        };
+        
+        scene.add(sphere);
+        container2Objects.push(sphere);
+      }
+      
+      // Log
+      logMessage(`Containers updated: Container 1: ${container1Objects.length} objects, Container 2: ${container2Objects.length} objects`);
+    }
+    
+    // Create decision matrix UI
+    function createDecisionMatrix() {
+      const matrix = document.getElementById('decision-matrix');
+      matrix.innerHTML = '';
+      
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          const cell = document.createElement('div');
+          cell.className = 'matrix-cell';
+          cell.dataset.row = i;
+          cell.dataset.col = j;
+          cell.textContent = libetParams.decisionMatrix[i][j];
+          
+          if (i === libetParams.matrixPosition.row && j === libetParams.matrixPosition.col) {
+            cell.classList.add('active');
+          }
+          
+          matrix.appendChild(cell);
+        }
+      }
+    }
+    
+    // Initialize readiness potential display
+    function initReadinessPotential() {
+      const canvas = document.getElementById('rp-canvas');
+      const context = canvas.getContext('2d');
+      
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      
+      // Draw baseline
+      context.beginPath();
+      context.moveTo(0, canvas.height / 2);
+      context.lineTo(canvas.width, canvas.height / 2);
+      context.strokeStyle = '#ddd';
+      context.lineWidth = 1;
+      context.stroke();
+    }
+    
+    // Update readiness potential display
+    function updateReadinessPotential() {
+      if (agentState !== 'processing' && agentState !== 'deciding' && agentState !== 'moving') return;
+      if (libetParams.currentTime < libetParams.rpOnsetTime) return;
+      
+      const canvas = document.getElementById('rp-canvas');
+      const context = canvas.getContext('2d');
+      
+      // Clear canvas
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw baseline
+      context.beginPath();
+      context.moveTo(0, canvas.height / 2);
+      context.lineTo(canvas.width, canvas.height / 2);
+      context.strokeStyle = '#ddd';
+      context.lineWidth = 1;
+      context.stroke();
+      
+      // Map time range to canvas width
+      const timeRange = Math.abs(libetParams.rpOnsetTime);
+      const pixelsPerMs = canvas.width / timeRange;
+      const startX = 0;
+      const endX = Math.min(
+        canvas.width,
+        (libetParams.currentTime - libetParams.rpOnsetTime) * pixelsPerMs
+      );
+      
+      // Draw readiness potential curve
+      context.beginPath();
+      context.moveTo(startX, canvas.height / 2);
+      
+      for (let x = 0; x <= endX; x++) {
+        const progress = x / canvas.width;
+        
+        // Simulate the readiness potential curve shape
+        let y;
+        if (progress < 0.6) {
+          // Initial slow buildup
+          y = canvas.height / 2 + progress * 20;
+        } else if (progress < 0.8) {
+          // Steeper decline
+          y = canvas.height / 2 + 12 + (progress - 0.6) * 60;
+        } else {
+          // Final rapid decline
+          y = canvas.height / 2 + 24 + (progress - 0.8) * 100;
+        }
+        
+        context.lineTo(x, y);
+      }
+      
+      context.strokeStyle = '#f44336';
+      context.lineWidth = 2;
+      context.stroke();
+      
+      // Highlight key events if they've occurred
+      if (libetParams.currentTime >= libetParams.rpOnsetTime) {
+        const rpX = 0;
+        drawEventMarker(context, rpX, canvas.height / 2, '#2196f3');
+      }
+      
+      if (libetParams.currentTime >= libetParams.awarenessTime) {
+        const awarenessX = Math.min(
+          canvas.width * 0.75,
+          (libetParams.awarenessTime - libetParams.rpOnsetTime) * pixelsPerMs
+        );
+        drawEventMarker(context, awarenessX, canvas.height / 2 + 30, '#4caf50');
+      }
+      
+      if (libetParams.currentTime >= libetParams.actionTime) {
+        const actionX = Math.min(
+          canvas.width,
+          (libetParams.actionTime - libetParams.rpOnsetTime) * pixelsPerMs
+        );
+        drawEventMarker(context, actionX, canvas.height / 2 + 50, '#ff9800');
+      }
+    }
+    
+    // Draw event marker
+    function drawEventMarker(context, x, y, color) {
+      context.beginPath();
+      context.arc(x, y, 5, 0, Math.PI * 2);
+      context.fillStyle = color;
+      context.fill();
+    }
+    
+    // Generate a wave source
+    function createSource() {
+      // Sources are more likely in midline/temporal regions (based on research notes)
+      const x = Math.floor(Math.random() * gridSize);
+      // Favor midline for Y (height)
+      const y = Math.floor(gridSize/2 + (Math.random() * gridSize/4 - gridSize/8));
+      // Favor lower values for Z (temporal regions)
+      const z = Math.floor(Math.random() * gridSize/3 + gridSize/3);
+      
+      // Create visual representation
+      const geometry = new THREE.SphereGeometry(0.4, 16, 16);
+      const material = new THREE.MeshPhongMaterial({ color: 0x4a69bd });
+      const source = new THREE.Mesh(geometry, material);
+      source.position.set(x, y, z);
+      
+      // Add pulsing effect
+      source.userData = {
+        type: 'source',
+        age: 0,
+        x: x,
+        y: y,
+        z: z,
+        lifespan: 100 + Math.random() * 300
+      };
+      
+      scene.add(source);
+      activeSources.push(source);
+      
+      // Update counter
+      document.getElementById('sources').textContent = activeSources.length;
+      
+      // Create a wave from this source
+      createWave(x, y, z);
+      
+      return source;
+    }
+    
+    // Generate a sink
+    function createSink() {
+      // Sinks are more likely in parietal regions (based on research notes)
+      const x = Math.floor(Math.random() * gridSize);
+      // Favor upper values for Y (height - parietal region)
+      const y = Math.floor(gridSize/2 + (Math.random() * gridSize/3));
+      // Favor middle values for Z
+      const z = Math.floor(gridSize/2 + (Math.random() * gridSize/4 - gridSize/8));
+      
+      // Create visual representation
+      const geometry = new THREE.SphereGeometry(0.4, 16, 16);
+      const material = new THREE.MeshPhongMaterial({ color: 0xeb4d4b });
+      const sink = new THREE.Mesh(geometry, material);
+      sink.position.set(x, y, z);
+      
+      sink.userData = {
+        type: 'sink',
+        age: 0,
+        x: x,
+        y: y,
+        z: z,
+        lifespan: 100 + Math.random() * 200
+      };
+      
+      scene.add(sink);
+      activeSinks.push(sink);
+      
+      // Update counter
+      document.getElementById('sinks').textContent = activeSinks.length;
+      
+      return sink;
+    }
+    
+    // Create a propagating wave
+    function createWave(sourceX, sourceY, sourceZ) {
+      const wave = {
+        source: { x: sourceX, y: sourceY, z: sourceZ },
+        radius: 0,
+        speed: config.waveSpeed,
+        age: 0,
+        points: []
+      };
+      
+      waves.push(wave);
+    }
+    
+    // Update wave propagation
+    function updateWaves() {
+      // Update existing waves
+      for (let i = waves.length - 1; i >= 0; i--) {
+        const wave = waves[i];
+        
+        // Increase radius based on speed
+        wave.radius += wave.speed * 0.1;
+        wave.age++;
+        
+        // Remove old wave points
+        wave.points.forEach(point => {
+          point.material.opacity = 0;
+        });
+        wave.points = [];
+        
+        // Create new wave points at current radius
+        const wavefrontThickness = 0.5;
+        
+        // Sample points on the sphere surface
+        for (let j = 0; j < 30; j++) {
+          // Random point on sphere surface
+          const phi = Math.acos(2 * Math.random() - 1);
+          const theta = Math.random() * Math.PI * 2;
+          
+          const x = Math.floor(wave.source.x + wave.radius * Math.sin(phi) * Math.cos(theta));
+          const y = Math.floor(wave.source.y + wave.radius * Math.sin(phi) * Math.sin(theta));
+          const z = Math.floor(wave.source.z + wave.radius * Math.cos(phi));
+          
+          // Check if coordinates are valid
+          if (x >= 0 && x < gridSize && y >= 0 && y < gridSize && z >= 0 && z < gridSize) {
+            const point = grid3D[x][y][z];
+            point.material.color.set(0xf6b93b);
+            point.material.opacity = 0.7;
+            wave.points.push(point);
+            
+            // Check for collision with sinks
+            activeSinks.forEach(sink => {
+              const dx = sink.position.x - x;
+              const dy = sink.position.y - y;
+              const dz = sink.position.z - z;
+              const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+              
+              if (distance < 1.5) {
+                // Wave absorbed by sink
+                sink.scale.set(1.2, 1.2, 1.2);
+                setTimeout(() => {
+                  sink.scale.set(1, 1, 1);
+                }, 200);
+              }
+            });
+          }
+        }
+        
+        // Remove old waves
+        if (wave.radius > gridSize * 1.5) {
+          waves.splice(i, 1);
+        }
+      }
+    }
+    
+    // Update metastable state dynamics
+    function updateMetastableStates() {
+      // Check if state should change based on dwell time
+      // Median dwell time from research: ~48-56ms
+      const stateDuration = 50 + Math.random() * 30; // Milliseconds in simulation time
+      
+      currentDwellTime = simulationTime - stateStartTime;
+      
+      if (currentDwellTime > stateDuration) {
+        previousState = currentState;
+        
+        // Generate a new metastable state
+        const states = [
+          "synchronous_activity",
+          "local_processing",
+          "global_integration",
+          "critical_transition",
+          "source_dominated",
+          "sink_dominated"
+        ];
+        
+        // Don't repeat the same state
+        let newStates = states.filter(state => state !== currentState);
+        currentState = newStates[Math.floor(Math.random() * newStates.length)];
+        
+        // Update UI
+        document.getElementById('current-state').textContent = currentState.replace(/_/g, ' ');
+        document.getElementById('dwell-time').textContent = Math.floor(currentDwellTime) + " ms";
+        
+        // Reset state timer
+        stateStartTime = simulationTime;
+        
+        // State transitions may generate new sources/sinks
+        if (Math.random() < 0.3) {
+          if (activeSources.length < 5) {
+            createSource();
+          }
+        }
+        
+        if (Math.random() < 0.3) {
+          if (activeSinks.length < 5) {
+            createSink();
+          }
+        }
+        
+        // Update coherence based on current state
+        updateCoherence();
+      }
+    }
+    
+    // Update coherence metric
+    function updateCoherence() {
+      // Different states have different coherence levels
+      const stateCoherenceMap = {
+        "synchronous_activity": 0.7 + Math.random() * 0.3,
+        "local_processing": 0.3 + Math.random() * 0.3,
+        "global_integration": 0.6 + Math.random() * 0.4,
+        "critical_transition": 0.4 + Math.random() * 0.2,
+        "source_dominated": 0.5 + Math.random() * 0.3,
+        "sink_dominated": 0.5 + Math.random() * 0.3
+      };
+      
+      // Base coherence on current state
+      let targetCoherence = stateCoherenceMap[currentState] || 0.5;
+      
+      // Influence of container objects
+      const objectRatio = container1Objects.length / (container1Objects.length + container2Objects.length);
+      const balanceFactor = Math.abs(0.5 - objectRatio) * 2; // 0 = perfectly balanced, 1 = completely imbalanced
+      
+      // More balance = more coherence
+      targetCoherence *= (1 - balanceFactor * 0.5);
+      
+      // Uncertainty reduces coherence
+      targetCoherence *= (1 - config.uncertainty * 0.5);
+      
+      // Smooth transition to new coherence value
+      coherenceValue = coherenceValue * 0.95 + targetCoherence * 0.05;
+      document.getElementById('coherence').textContent = coherenceValue.toFixed(2);
+    }
+    
+    // Apply settings from UI
+    function applySettings() {
+      config.container1Count = parseInt(document.getElementById('container1').value) || 3;
+      config.container2Count = parseInt(document.getElementById('container2').value) || 2;
+      config.uncertainty = parseFloat(document.getElementById('uncertainty').value) || 0.3;
+      
+      // Clamp values
+      config.container1Count = Math.max(1, Math.min(5, config.container1Count));
+      config.container2Count = Math.max(1, Math.min(5, config.container2Count));
+      
+      // Reset agent to start position if it's currently idle
+      if (agentState === 'idle') {
+        agentMesh.position.set(agentStart.x, agentStart.y, agentStart.z);
+      }
+      
+      // Update containers
+      updateContainers();
+      
+      logMessage("Settings applied. Environment updated.");
+    }
+    
+    // Reset simulation
+    function resetSimulation() {
+      // Clear existing elements
+      activeSources.forEach(source => scene.remove(source));
+      activeSinks.forEach(sink => scene.remove(sink));
+      activeSources = [];
+      activeSinks = [];
+      waves = [];
+      
+      // Reset grid points
+      for (let x = 0; x < gridSize; x++) {
+        for (let y = 0; y < gridSize; y++) {
+          for (let z = 0; z < gridSize; z++) {
+            if (grid3D[x][y][z]) {
+              grid3D[x][y][z].material.opacity = 0;
+            }
+          }
+        }
+      }
+      
+      // Reset agent position and state
+      agentMesh.position.set(agentStart.x, agentStart.y, agentStart.z);
+      agentState = 'idle';
+      updateAgentStatus('idle');
+      
+      // Reset metrics
+      simulationTime = 0;
+      currentDwellTime = 0;
+      stateStartTime = 0;
+      coherenceValue = 0;
+      currentState = "initialization";
+      previousState = "";
+      
+      // Reset containers to unhighlighted state
+      container1Objects.forEach(obj => {
+        obj.material.emissive = new THREE.Color(0x000000);
+      });
+      
+      container2Objects.forEach(obj => {
+        obj.material.emissive = new THREE.Color(0x000000);
+      });
+      
+      // Update UI
+      document.getElementById('coherence').textContent = "0.00";
+      document.getElementById('dwell-time').textContent = "0 ms";
+      document.getElementById('sources').textContent = "0";
+      document.getElementById('sinks').textContent = "0";
+      document.getElementById('current-state').textContent = "Initialization";
+      
+      // Create initial source and sink
+      createSource();
+      createSink();
+      
+      // Reset Libet parameters
+      libetParams.currentTime = -1000;
+      libetParams.decisionMade = false;
+      libetParams.awareOfDecision = false;
+      libetParams.targetContainer = null;
+      
+      // Clear decision matrix highlight
+      const cells = document.querySelectorAll('.matrix-cell');
+      cells.forEach(cell => {
+        cell.classList.remove('selected');
+      });
+      
+      // Clear readiness potential display
+      initReadinessPotential();
+      
+      logMessage("Simulation reset. Environment reinitialized.");
+    }
+    
+    // Start agent decision process (Libet experiment)
+    function startAgentDecision() {
+      if (agentState !== 'idle') {
+        logMessage("Cannot start decision process: Agent is already active.");
+        return;
+      }
+      
+      // Set agent to processing state
+      agentState = 'processing';
+      updateAgentStatus('processing');
+      
+      // Reset Libet parameters
+      libetParams.currentTime = libetParams.rpOnsetTime - 200; // Start a bit before RP onset
+      libetParams.decisionMade = false;
+      libetParams.awareOfDecision = false;
+      
+      // Determine target based on object counts (decision happens at neural level first)
+      const container1Count = container1Objects.length;
+      const container2Count = container2Objects.length;
+      
+      if (container1Count > container2Count) {
+        libetParams.targetContainer = 1;
+        libetParams.matrixPosition = { row: 1, col: 0 }; // Left
+      } else if (container2Count > container1Count) {
+        libetParams.targetContainer = 2;
+        libetParams.matrixPosition = { row: 1, col: 2 }; // Right
+      } else {
+        // If counts are equal, choose randomly with slight bias based on uncertainty
+        if (Math.random() < 0.5 + (config.uncertainty - 0.5) * 0.2) {
+          libetParams.targetContainer = 1;
+          libetParams.matrixPosition = { row: 0, col: 0 }; // Left
+        } else {
+          libetParams.targetContainer = 2;
+          libetParams.matrixPosition = { row: 2, col: 2 }; // Right
+        }
+      }
+      
+      logMessage(`Agent decision process started. Neural readiness potential building...`);
+      
+      // Activate neural activity visualization
+      activateNeuralActivity();
+    }
+    
+    // Update agent status in UI
+    function updateAgentStatus(status) {
+      const indicator = document.getElementById('agent-status-indicator');
+      const text = document.getElementById('agent-status-text');
+      
+      // Remove all classes
+      indicator.className = 'status-indicator';
+      
+      // Add appropriate class and text
+      switch (status) {
+        case 'idle':
+          indicator.classList.add('status-idle');
+          text.textContent = 'Idle';
+          break;
+        case 'processing':
+          indicator.classList.add('status-processing');
+          text.textContent = 'Neural Processing';
+          break;
+        case 'deciding':
+          indicator.classList.add('status-deciding');
+          text.textContent = 'Conscious Decision';
+          break;
+        case 'moving':
+          indicator.classList.add('status-moving');
+          text.textContent = 'Moving to Target';
+          break;
+      }
+    }
+    
+    // Update Libet decision process
+    function updateLibetProcess() {
+      if (agentState === 'idle') return;
+      
+      // Advance time
+      libetParams.currentTime += 10; // 10ms steps
+      
+      // Update readiness potential display
+      updateReadinessPotential();
+      
+      // Check for decision point (neural decision before consciousness)
+      if (!libetParams.decisionMade && libetParams.currentTime >= libetParams.rpOnsetTime + 400) {
+        libetParams.decisionMade = true;
+        
+        // Update matrix UI to highlight decision (but not select it yet)
+        updateDecisionMatrixHighlight();
+        
+        logMessage(`Neural decision made to select Container ${libetParams.targetContainer} (not yet conscious)`);
+      }
+      
+      // Check for conscious awareness point
+      if (libetParams.decisionMade && !libetParams.awareOfDecision && 
+          libetParams.currentTime >= libetParams.awarenessTime) {
+        libetParams.awareOfDecision = true;
+        agentState = 'deciding';
+        updateAgentStatus('deciding');
+        
+        // Highlight decision in matrix as selected
+        selectDecisionMatrixCell();
+        
+        logMessage(`Agent becomes conscious of decision to select Container ${libetParams.targetContainer}`);
+      }
+      
+      // Check for action execution point
+      if (libetParams.awareOfDecision && libetParams.currentTime >= libetParams.actionTime) {
+        agentState = 'moving';
+        updateAgentStatus('moving');
+        
+        // Move agent to selected container
+        moveAgentToContainer(libetParams.targetContainer);
+        
+        logMessage(`Action execution: Moving to Container ${libetParams.targetContainer}`);
+      }
+    }
+    
+    // Update decision matrix highlight based on neural decision
+    function updateDecisionMatrixHighlight() {
+      const matrix = document.getElementById('decision-matrix');
+      const cells = matrix.getElementsByClassName('matrix-cell');
+      
+      // Reset all cells
+      for (const cell of cells) {
+        cell.classList.remove('active');
+      }
+      
+      // Highlight cell corresponding to neural decision
+      for (const cell of cells) {
+        if (parseInt(cell.dataset.row) === libetParams.matrixPosition.row && 
+            parseInt(cell.dataset.col) === libetParams.matrixPosition.col) {
+          cell.classList.add('active');
+        }
+      }
+    }
+    
+    // Select decision matrix cell (conscious awareness)
+    function selectDecisionMatrixCell() {
+      const matrix = document.getElementById('decision-matrix');
+      const cells = matrix.getElementsByClassName('matrix-cell');
+      
+      // Add selected class to active cell
+      for (const cell of cells) {
+        if (parseInt(cell.dataset.row) === libetParams.matrixPosition.row && 
+            parseInt(cell.dataset.col) === libetParams.matrixPosition.col) {
+          cell.classList.add('selected');
+        }
+      }
+    }
+    
+    // Activate neural activity visualization in agent's brain
+    function activateNeuralActivity() {
+      if (!agentMesh) return;
+      
+      // Get brain and neurons
+      const brain = agentMesh.children[0];
+      if (!brain) return;
+      
+      // Activate neurons progressively
+      brain.children.forEach((neuron, index) => {
+        // Delay activation based on index to create sequenced effect
+        setTimeout(() => {
+          neuron.userData.active = true;
+          neuron.material.opacity = 0.8;
+        }, index * 100);
+      });
+    }
+    
+    // Update neural activity visualization
+    function updateNeuralActivity() {
+      if (!agentMesh) return;
+      
+      // Get brain
+      const brain = agentMesh.children[0];
+      if (!brain) return;
+      
+      // Update each neuron
+      brain.children.forEach(neuron => {
+        if (neuron.userData && neuron.userData.active) {
+          // Pulsing effect
+          const time = simulationTime * neuron.userData.pulseSpeed;
+          neuron.position.x = neuron.userData.initialPos.x + Math.sin(time) * 0.05;
+          neuron.position.y = neuron.userData.initialPos.y + Math.cos(time) * 0.05;
+          neuron.position.z = neuron.userData.initialPos.z + Math.sin(time * 1.5) * 0.05;
+          
+          // Adjust opacity based on Libet process phase
+          if (agentState === 'processing') {
+            // Gradually increase during processing
+            neuron.material.opacity = 0.3 + 0.5 * Math.sin(time * 2) * Math.sin(time * 2);
+          } else if (agentState === 'deciding') {
+            // More intense during conscious decision
+            neuron.material.opacity = 0.5 + 0.5 * Math.sin(time * 3) * Math.sin(time * 3);
+          } else if (agentState === 'moving') {
+            // Start fading during movement
+            neuron.material.opacity *= 0.99;
+          } else {
+            // Fade out when idle
+            neuron.material.opacity *= 0.95;
+            if (neuron.material.opacity < 0.1) {
+              neuron.userData.active = false;
+              neuron.material.opacity = 0;
+              neuron.position.copy(neuron.userData.initialPos);
+            }
+          }
+        }
+      });
+    }
+    
+    // Move agent to target container
+    function moveAgentToContainer(containerId) {
+      const targetPosition = containerId === 1 ? 
+        new THREE.Vector3(gridSize/6, gridSize/2, gridSize/2) :
+        new THREE.Vector3(gridSize - gridSize/6, gridSize/2, gridSize/2);
+      
+      // Store start position and time for animation
+      const startPosition = agentMesh.position.clone();
+      const startTime = simulationTime;
+      const duration = 100; // Animation duration in simulation frames
+      
+      // Create animation function
+      function animateMovement() {
+        const elapsed = simulationTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Ease in-out function for smooth movement
+        const easedProgress = progress < 0.5 ?
+          2 * progress * progress :
+          1 - Math.pow(-2 * progress + 2, 2) / 2;
+        
+        // Interpolate position
+        agentMesh.position.lerpVectors(startPosition, targetPosition, easedProgress);
+        
+        // If animation complete, highlight objects
+        if (progress >= 1) {
+          highlightContainerObjects(containerId);
+          agentState = 'idle';
+          updateAgentStatus('idle');
+          logMessage(`Selection complete: Container ${containerId} selected with ${
+            containerId === 1 ? container1Objects.length : container2Objects.length
+          } objects`);
+        }
+      }
+      
+      // Store animation function for use in main loop
+      agentMesh.userData.animateMovement = animateMovement;
+    }
+    
+    // Highlight objects in selected container
+    function highlightContainerObjects(containerId) {
+      // Reset all objects
+      container1Objects.forEach(obj => {
+        obj.material.emissive = new THREE.Color(0x000000);
+        obj.material.emissiveIntensity = 0;
+      });
+      
+      container2Objects.forEach(obj => {
+        obj.material.emissive = new THREE.Color(0x000000);
+        obj.material.emissiveIntensity = 0;
+      });
+      
+      // Highlight selected container
+      const selectedObjects = containerId === 1 ? container1Objects : container2Objects;
+      selectedObjects.forEach(obj => {
+        obj.material.emissive = new THREE.Color(0x00ff00);
+        obj.material.emissiveIntensity = 0.5;
+      });
+    }
+    
+    // Log a message to the UI
+    function logMessage(message) {
+      const container = document.getElementById('log-container');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
+      
+      container.appendChild(entry);
+      container.scrollTop = container.scrollHeight;
+      
+      // Keep log at reasonable size
+      while (container.children.length > 30) {
+        container.removeChild(container.firstChild);
+      }
+    }
+    
+    // Main animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Rotate camera slightly for 3D effect
+      camera.position.x = gridSize + Math.sin(simulationTime * 0.001) * 5;
+      camera.position.z = gridSize * 1.5 + Math.cos(simulationTime * 0.001) * 5;
+      camera.lookAt(gridSize / 2, gridSize / 2, gridSize / 2);
+      
+      // Randomly generate sources and sinks with low probability when simulation is active
+      if (Math.random() < 0.003 && activeSources.length < 5) {
+        createSource();
+      }
+      
+      if (Math.random() < 0.002 && activeSinks.length < 5) {
+        createSink();
+      }
+      
+      // Update sources and sinks
+      for (let i = activeSources.length - 1; i >= 0; i--) {
+        const source = activeSources[i];
+        source.userData.age++;
+        
+        // Pulsing effect
+        const scale = 1 + 0.1 * Math.sin(source.userData.age * 0.1);
+        source.scale.set(scale, scale, scale);
+        
+        // Remove old sources
+        if (source.userData.age > source.userData.lifespan) {
+          scene.remove(source);
+          activeSources.splice(i, 1);
+          document.getElementById('sources').textContent = activeSources.length;
+        }
+      }
+      
+      for (let i = activeSinks.length - 1; i >= 0; i--) {
+        const sink = activeSinks[i];
+        sink.userData.age++;
+        
+        // Pulsing effect
+        const scale = 1 - 0.1 * Math.sin(sink.userData.age * 0.1);
+        sink.scale.set(scale, scale, scale);
+        
+        // Remove old sinks
+        if (sink.userData.age > sink.userData.lifespan) {
+          scene.remove(sink);
+          activeSinks.splice(i, 1);
+          document.getElementById('sinks').textContent = activeSinks.length;
+        }
+      }
+      
+      // Update wave propagation
+      updateWaves();
+      
+      // Update metastable states
+      updateMetastableStates();
+      
+      // Update Libet decision process
+      updateLibetProcess();
+      
+      // Update neural activity visualization
+      updateNeuralActivity();
+      
+      // Check if agent is moving
+      if (agentMesh.userData.animateMovement && agentState === 'moving') {
+        agentMesh.userData.animateMovement();
+      }
+      
+      // Animate container objects (gentle bobbing)
+      container1Objects.forEach((obj, index) => {
+        obj.position.y += Math.sin(simulationTime * 0.01 + index) * 0.01;
+      });
+      
+      container2Objects.forEach((obj, index) => {
+        obj.position.y += Math.sin(simulationTime * 0.01 + index + Math.PI) * 0.01;
+      });
+      
+      // Increment simulation time
+      simulationTime++;
+      
+      renderer.render(scene, camera);
+    }
+    
+    // Handle window resize
+    function onWindowResize() {
+      const container = document.getElementById('canvas-container');
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+    
+    window.addEventListener('resize', onWindowResize);
+    
+    // Initialize on load
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
