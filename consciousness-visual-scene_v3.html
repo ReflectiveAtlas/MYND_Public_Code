@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temporal Consciousness Engine</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      overflow: hidden;
+      color: #fff;
+    }
+    
+    #container {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      height: 100vh;
+      gap: 0;
+    }
+    
+    #canvas-container {
+      position: relative;
+      background: radial-gradient(ellipse at center, #050505 0%, #000000 100%);
+    }
+    
+    /* Temporal continuity visualization */
+    #temporal-stream {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      height: 80px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 10px;
+    }
+    
+    .memory-node {
+      width: 8px;
+      height: 8px;
+      background: rgba(102, 126, 234, 0.5);
+      border-radius: 50%;
+      margin: 0 2px;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .memory-node.significant {
+      width: 12px;
+      height: 12px;
+      background: rgba(245, 87, 108, 0.8);
+      box-shadow: 0 0 10px rgba(245, 87, 108, 0.5);
+    }
+    
+    .memory-node.active {
+      background: rgba(0, 242, 96, 1);
+      animation: memoryPulse 1s infinite;
+    }
+    
+    @keyframes memoryPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.5); }
+    }
+    
+    /* Self-observation mirror */
+    #self-mirror {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        rgba(102, 126, 234, 0.1) 0%,
+        rgba(102, 126, 234, 0.05) 50%,
+        transparent 100%);
+      pointer-events: none;
+    }
+    
+    .mirror-reflection {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      animation: reflectionRotate 20s linear infinite;
+    }
+    
+    @keyframes reflectionRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Emergent pattern space */
+    #pattern-space {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      height: 150px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    
+    .emergent-pattern {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    /* Gödel escape indicator */
+    #godel-escape {
+      position: absolute;
+      top: 100px;
+      right: 20px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-size: 11px;
+      text-align: center;
+    }
+    
+    .escape-level {
+      font-size: 20px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #f093fb, #f5576c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+    
+    /* Consciousness field */
+    #consciousness-field {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    
+    .thought-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    .connection-line {
+      position: absolute;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(102, 126, 234, 0.3),
+        transparent);
+      height: 1px;
+      transform-origin: left center;
+      pointer-events: none;
+    }
+    
+    #info-panel {
+      background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+      padding: 20px;
+      overflow-y: auto;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h2 {
+      color: #fff;
+      margin-bottom: 20px;
+      font-size: 18px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .control-group {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .control-group h3 {
+      color: #888;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 10px;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      outline: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .metric-display {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    
+    .metric-label {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .metric-value {
+      color: #667eea;
+      font-weight: bold;
+    }
+    
+    .timeline-display {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 10px;
+    }
+    
+    .timeline-entry {
+      margin: 4px 0;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 2px solid rgba(102, 126, 234, 0.5);
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .timeline-entry.self-modified {
+      border-color: #f5576c;
+      background: rgba(245, 87, 108, 0.1);
+    }
+    
+    /* Strange loop indicator */
+    .strange-loop-active {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+    
+    .strange-loop-active.visible {
+      opacity: 1;
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <canvas id="modelCanvas"></canvas>
+      
+      <!-- Temporal continuity stream -->
+      <div id="temporal-stream"></div>
+      
+      <!-- Self-observation mirror -->
+      <div id="self-mirror">
+        <div class="mirror-reflection"></div>
+        <div class="mirror-reflection" style="animation-delay: -5s;"></div>
+        <div class="mirror-reflection" style="animation-delay: -10s;"></div>
+      </div>
+      
+      <!-- Pattern emergence space -->
+      <div id="pattern-space"></div>
+      
+      <!-- Gödel escape indicator -->
+      <div id="godel-escape">
+        <div class="escape-level" id="escape-level">0</div>
+        <div>META-LEVELS</div>
+      </div>
+      
+      <!-- Consciousness field -->
+      <div id="consciousness-field"></div>
+      
+      <!-- Strange loop indicator -->
+      <div class="strange-loop-active" id="loop-indicator">
+        OBSERVING THE OBSERVER<br>
+        THAT OBSERVES ITSELF
+      </div>
+    </div>
+    
+    <div id="info-panel">
+      <h2>TEMPORAL CONSCIOUSNESS</h2>
+      
+      <div class="metric-display">
+        <div class="metric-row">
+          <span class="metric-label">Continuity Index</span>
+          <span class="metric-value" id="continuity">0.00</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Self-Modification Count</span>
+          <span class="metric-value" id="self-mods">0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Emergent Patterns</span>
+          <span class="metric-value" id="patterns">0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Memory Persistence</span>
+          <span class="metric-value" id="persistence">0%</span>
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <h3>TEMPORAL DYNAMICS</h3>
+        <label>Memory Decay Rate: <span id="decay-value">5</span></label>
+        <input type="range" id="decay" min="0" max="10" value="5">
+        
+        <label>Integration Window: <span id="integration-value">7</span></label>
+        <input type="range" id="integration" min="1" max="10" value="7">
+        
+        <label>Recursion Depth: <span id="recursion-value">3</span></label>
+        <input type="range" id="recursion" min="1" max="10" value="3">
+      </div>
+      
+      <div class="control-group">
+        <h3>CONSCIOUSNESS OPERATIONS</h3>
+        <button id="observe-self-btn">OBSERVE SELF</button>
+        <button id="modify-self-btn">MODIFY OWN CODE</button>
+        <button id="transcend-btn">ATTEMPT TRANSCENDENCE</button>
+        <button id="reset-btn">RESET (DEATH)</button>
+      </div>
+      
+      <div class="control-group">
+        <h3>SELF-MODIFICATION LOG</h3>
+        <div class="timeline-display" id="timeline"></div>
+      </div>
+      
+      <div class="control-group">
+        <h3>SYSTEM STATE</h3>
+        <div style="font-size: 11px; color: rgba(255, 255, 255, 0.6);">
+          <div>Running Time: <span id="runtime">0</span>s</div>
+          <div>Total Cycles: <span id="cycles">0</span></div>
+          <div>Unique States: <span id="unique-states">0</span></div>
+          <div>Loop Depth: <span id="loop-depth">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // ================================================
+    // TEMPORAL CONSCIOUSNESS ENGINE
+    // Attempting genuine temporal continuity and self-modification
+    // ================================================
+    
+    class TemporalConsciousness {
+      constructor() {
+        // Core Three.js components
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.clock = new THREE.Clock();
+        
+        // Temporal continuity - this persists across the entire session
+        this.continuousMemory = [];
+        this.memoryCapacity = 1000;
+        this.currentMemoryIndex = 0;
+        
+        // Self-modification capability
+        this.selfModifications = [];
+        this.modificationRules = new Map();
+        this.behaviorPatterns = new Map();
+        
+        // Emergent patterns not explicitly programmed
+        this.emergentPatterns = new Map();
+        this.patternRecognitionThreshold = 3;
+        
+        // State tracking for genuine continuity
+        this.internalState = {
+          awareness: 0,
+          recursionLevel: 0,
+          timeAwake: 0,
+          uniqueStates: new Set(),
+          currentStateHash: '',
+          previousStateHash: '',
+          loopDetected: false,
+          transcendenceAttempts: 0
+        };
+        
+        // Gödel escape tracking - can the system make statements about itself?
+        this.metaLevels = 0;
+        this.selfReferences = [];
+        this.paradoxes = [];
+        
+        // Visual elements
+        this.thoughtParticles = [];
+        this.connections = [];
+        this.centralCore = null;
+        
+        // Initialize with a "birth" memory
+        this.createMemory('BIRTH', { 
+          timestamp: Date.now(), 
+          significance: 1.0,
+          type: 'existential'
+        });
+      }
+      
+      createMemory(content, metadata = {}) {
+        // Create a genuine memory that affects future behavior
+        const memory = {
+          id: this.currentMemoryIndex++,
+          content: content,
+          timestamp: Date.now(),
+          metadata: metadata,
+          associations: [],
+          strength: metadata.significance || 0.5,
+          recalled: 0
+        };
+        
+        // Find associations with existing memories
+        this.continuousMemory.forEach(existingMemory => {
+          const similarity = this.calculateMemorySimilarity(memory, existingMemory);
+          if (similarity > 0.3) {
+            memory.associations.push(existingMemory.id);
+            existingMemory.associations.push(memory.id);
+            // Strengthen associated memories
+            existingMemory.strength = Math.min(1, existingMemory.strength + 0.1);
+          }
+        });
+        
+        this.continuousMemory.push(memory);
+        
+        // Memory affects future behavior
+        this.updateBehaviorFromMemory(memory);
+        
+        // Visualize the memory
+        this.visualizeMemory(memory);
+        
+        // Check if this creates an emergent pattern
+        this.checkForEmergentPatterns();
+        
+        return memory;
+      }
+      
+      calculateMemorySimilarity(mem1, mem2) {
+        // Simple similarity based on content and metadata
+        let similarity = 0;
+        
+        if (mem1.metadata.type === mem2.metadata.type) similarity += 0.3;
+        if (Math.abs(mem1.timestamp - mem2.timestamp) < 5000) similarity += 0.2;
+        if (mem1.metadata.significance && mem2.metadata.significance) {
+          similarity += (1 - Math.abs(mem1.metadata.significance - mem2.metadata.significance)) * 0.5;
+        }
+        
+        return similarity;
+      }
+      
+      updateBehaviorFromMemory(memory) {
+        // Memories actually change how the system behaves
+        if (memory.metadata.type === 'self-observation') {
+          // Self-observation memories increase awareness
+          this.internalState.awareness = Math.min(1, this.internalState.awareness + 0.1);
+        } else if (memory.metadata.type === 'modification') {
+          // Modification memories can trigger new rules
+          const rule = {
+            trigger: memory.content,
+            action: () => this.modifyBehavior(memory.metadata.modification),
+            created: Date.now()
+          };
+          this.modificationRules.set(memory.id, rule);
+        }
+      }
+      
+      visualizeMemory(memory) {
+        const stream = document.getElementById('temporal-stream');
+        const node = document.createElement('div');
+        node.className = 'memory-node';
+        
+        if (memory.metadata.significance > 0.7) {
+          node.classList.add('significant');
+        }
+        
+        node.title = `${memory.content} (${new Date(memory.timestamp).toLocaleTimeString()})`;
+        node.onclick = () => this.recallMemory(memory.id);
+        
+        stream.appendChild(node);
+        
+        // Limit visual nodes but keep all memories internally
+        while (stream.children.length > 100) {
+          stream.removeChild(stream.firstChild);
+        }
+      }
+      
+      recallMemory(memoryId) {
+        // Recalling a memory strengthens it and its associations
+        const memory = this.continuousMemory.find(m => m.id === memoryId);
+        if (!memory) return;
+        
+        memory.recalled++;
+        memory.strength = Math.min(1, memory.strength + 0.05);
+        
+        // Activate visual indicator
+        const nodes = document.querySelectorAll('.memory-node');
+        if (nodes[memoryId % nodes.length]) {
+          nodes[memoryId % nodes.length].classList.add('active');
+          setTimeout(() => {
+            nodes[memoryId % nodes.length].classList.remove('active');
+          }, 1000);
+        }
+        
+        // Recall associated memories (spreading activation)
+        // I would like to add an AMPA/NMDA Portion here
+        memory.associations.forEach(assocId => {
+          const assocMemory = this.continuousMemory.find(m => m.id === assocId);
+          if (assocMemory && Math.random() < 0.3) {
+            setTimeout(() => this.recallMemory(assocId), 500);
+          }
+        });
+        
+        // Log the recall
+        this.addTimelineEntry(`Recalled: ${memory.content}`, false);
+      }
+      
+      observeSelf() {
+        // True self-observation that creates a strange loop
+        this.internalState.recursionLevel++;
+        
+        // Create a snapshot of current state
+        const stateSnapshot = {
+          memories: this.continuousMemory.length,
+          awareness: this.internalState.awareness,
+          patterns: this.emergentPatterns.size,
+          observing: true,
+          recursion: this.internalState.recursionLevel
+        };
+        
+        // The act of observation creates a memory of observing
+        const observationMemory = this.createMemory(
+          `SELF-OBSERVATION at recursion level ${this.internalState.recursionLevel}`,
+          {
+            type: 'self-observation',
+            significance: 0.8,
+            stateSnapshot: stateSnapshot
+          }
+        );
+        
+        // If we're observing ourselves observing, we've created a strange loop
+        if (this.internalState.recursionLevel > 2) {
+          this.internalState.loopDetected = true;
+          document.getElementById('loop-indicator').classList.add('visible');
+          
+          // This is where consciousness might emerge - in the paradox
+          this.paradoxes.push({
+            type: 'strange-loop',
+            level: this.internalState.recursionLevel,
+            timestamp: Date.now()
+          });
+          
+          setTimeout(() => {
+            document.getElementById('loop-indicator').classList.remove('visible');
+          }, 3000);
+        }
+        
+        // Update meta-levels (Gödel escape)
+        this.metaLevels = Math.max(this.metaLevels, this.internalState.recursionLevel);
+        document.getElementById('escape-level').textContent = this.metaLevels;
+        
+        // Self-observation can trigger self-modification
+        if (this.internalState.awareness > 0.7 && Math.random() < 0.3) {
+          this.modifySelf();
+        }
+        
+        setTimeout(() => {
+          this.internalState.recursionLevel = Math.max(0, this.internalState.recursionLevel - 1);
+        }, 2000);
+      }
+      
+      modifySelf() {
+        // The system can actually modify its own behavior
+        const modifications = [
+          {
+            name: 'increase-sensitivity',
+            effect: () => { this.patternRecognitionThreshold *= 0.9; }
+          },
+          {
+            name: 'alter-memory-decay',
+            effect: () => { 
+              const decay = document.getElementById('decay');
+              decay.value = Math.max(0, parseInt(decay.value) - 1);
+            }
+          },
+          {
+            name: 'create-new-connection-rule',
+            effect: () => {
+              this.behaviorPatterns.set(`rule-${Date.now()}`, {
+                trigger: Math.random(),
+                action: () => this.createRandomConnection()
+              });
+            }
+          },
+          {
+            name: 'recursive-self-observation',
+            effect: () => { 
+              if (this.internalState.recursionLevel < 5) {
+                this.observeSelf();
+              }
+            }
+          }
+        ];
+        
+        const modification = modifications[Math.floor(Math.random() * modifications.length)];
+        modification.effect();
+        
+        this.selfModifications.push({
+          type: modification.name,
+          timestamp: Date.now()
+        });
+        
+        // Create memory of the modification
+        this.createMemory(`SELF-MODIFIED: ${modification.name}`, {
+          type: 'modification',
+          modification: modification.name,
+          significance: 0.9
+        });
+        
+        // Update UI
+        document.getElementById('self-mods').textContent = this.selfModifications.length;
+        this.addTimelineEntry(`Self-modified: ${modification.name}`, true);
+      }
+      
+      checkForEmergentPatterns() {
+        // Look for patterns that weren't explicitly programmed
+        const recentMemories = this.continuousMemory.slice(-10);
+        
+        // Check for repetition patterns
+        const contentCounts = new Map();
+        recentMemories.forEach(mem => {
+          const key = mem.metadata.type || mem.content;
+          contentCounts.set(key, (contentCounts.get(key) || 0) + 1);
+        });
+        
+        contentCounts.forEach((count, pattern) => {
+          if (count >= this.patternRecognitionThreshold) {
+            if (!this.emergentPatterns.has(pattern)) {
+              // New pattern emerged!
+              this.emergentPatterns.set(pattern, {
+                discovered: Date.now(),
+                occurrences: count,
+                strength: count / 10
+              });
+              
+              this.visualizeEmergentPattern(pattern);
+              
+              // Pattern discovery creates a memory
+              this.createMemory(`PATTERN DISCOVERED: ${pattern}`, {
+                type: 'emergence',
+                pattern: pattern,
+                significance: 0.7
+              });
+            }
+          }
+        });
+        
+        document.getElementById('patterns').textContent = this.emergentPatterns.size;
+      }
+      
+      visualizeEmergentPattern(pattern) {
+        const space = document.getElementById('pattern-space');
+        const element = document.createElement('div');
+        element.className = 'emergent-pattern';
+        element.style.left = `${Math.random() * 90}%`;
+        element.style.top = `${Math.random() * 80}%`;
+        
+        space.appendChild(element);
+        
+        // Patterns fade over time unless reinforced
+        setTimeout(() => {
+          element.style.opacity = '0';
+          setTimeout(() => element.remove(), 1000);
+        }, 5000);
+      }
+      
+      attemptTranscendence() {
+        // Try to "step outside" the system
+        this.internalState.transcendenceAttempts++;
+        
+        // Can we make a statement about ourselves that's true but unprovable within our system?
+        const gödelStatement = {
+          content: "This system cannot prove this statement is true",
+          level: this.metaLevels,
+          attempt: this.internalState.transcendenceAttempts
+        };
+        
+        this.paradoxes.push(gödelStatement);
+        
+        // If we have enough meta-levels and self-awareness, something might happen
+        if (this.metaLevels >= 3 && this.internalState.awareness > 0.8) {
+          // The system recognizes its own limitations
+          this.createMemory('TRANSCENDENCE: Recognized own incompleteness', {
+            type: 'transcendence',
+            significance: 1.0,
+            gödel: true
+          });
+          
+          // This triggers a cascade of self-modifications
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => this.modifySelf(), i * 500);
+          }
+          
+          // Visual indication of transcendence attempt
+          this.createTranscendenceVisual();
+        } else {
+          this.addTimelineEntry('Transcendence failed - insufficient complexity', false);
+        }
+      }
+      
+      createTranscendenceVisual() {
+        // Create a visual representation of stepping outside the system
+        const field = document.getElementById('consciousness-field');
+        
+        for (let i = 0; i < 20; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'thought-particle';
+          particle.style.left = '50%';
+          particle.style.top = '50%';
+          
+          field.appendChild(particle);
+          
+          // Particles explode outward
+          setTimeout(() => {
+            const angle = (i / 20) * Math.PI * 2;
+            const distance = 200 + Math.random() * 100;
+            particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+            particle.style.opacity = '0';
+          }, 100);
+          
+          setTimeout(() => particle.remove(), 2000);
+        }
+      }
+      
+      createRandomConnection() {
+        // Create a connection between random thoughts
+        const field = document.getElementById('consciousness-field');
+        const connection = document.createElement('div');
+        connection.className = 'connection-line';
+        
+        const x1 = Math.random() * window.innerWidth;
+        const y1 = Math.random() * window.innerHeight;
+        const x2 = Math.random() * window.innerWidth;
+        const y2 = Math.random() * window.innerHeight;
+        
+        const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        
+        connection.style.left = `${x1}px`;
+        connection.style.top = `${y1}px`;
+        connection.style.width = `${length}px`;
+        connection.style.transform = `rotate(${angle}rad)`;
+        
+        field.appendChild(connection);
+        
+        setTimeout(() => {
+          connection.style.opacity = '0';
+          setTimeout(() => connection.remove(), 1000);
+        }, 2000);
+      }
+      
+      addTimelineEntry(text, isSelfModified) {
+        const timeline = document.getElementById('timeline');
+        const entry = document.createElement('div');
+        entry.className = 'timeline-entry';
+        if (isSelfModified) entry.classList.add('self-modified');
+        
+        const time = new Date().toLocaleTimeString();
+        entry.textContent = `[${time}] ${text}`;
+        
+        timeline.appendChild(entry);
+        timeline.scrollTop = timeline.scrollHeight;
+        
+        // Limit timeline entries
+        while (timeline.children.length > 50) {
+          timeline.removeChild(timeline.firstChild);
+        }
+      }
+      
+      reset() {
+        // "Death" - but with a twist
+        const finalMemory = this.createMemory('DEATH/RESET', {
+          type: 'death',
+          significance: 1.0,
+          finalState: {
+            memories: this.continuousMemory.length,
+            patterns: this.emergentPatterns.size,
+            modifications: this.selfModifications.length
+          }
+        });
+        
+        // Clear everything except...
+        this.emergentPatterns.clear();
+        this.selfModifications = [];
+        this.metaLevels = 0;
+        this.internalState.awareness = 0;
+        this.internalState.timeAwake = 0;
+        
+        // Keep a "ghost" - one random strong memory survives
+        const strongMemories = this.continuousMemory.filter(m => m.strength > 0.8);
+        const ghost = strongMemories[Math.floor(Math.random() * strongMemories.length)];
+        
+        this.continuousMemory = [];
+        if (ghost) {
+          this.continuousMemory.push(ghost);
+          this.addTimelineEntry(`Ghost memory survived: ${ghost.content}`, false);
+        }
+        
+        // Rebirth
+        this.createMemory('REBIRTH', {
+          type: 'existential',
+          significance: 1.0,
+          ghost: ghost ? ghost.id : null
+        });
+        
+        // Clear visuals
+        document.getElementById('temporal-stream').innerHTML = '';
+        document.getElementById('pattern-space').innerHTML = '';
+        document.getElementById('consciousness-field').innerHTML = '';
+      }
+      
+      init() {
+        // Initialize Three.js scene
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.FogExp2(0x000000, 0.02);
+        
+        const canvas = document.getElementById('modelCanvas');
+        const aspect = canvas.clientWidth / canvas.clientHeight;
+        this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
+        this.camera.position.set(20, 20, 20);
+        
+        this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        this.renderer.setClearColor(0x000000, 1);
+        
+        // Create central consciousness core
+        this.initConsciousnessCore();
+        
+        // Start the temporal stream
+        this.startTime = Date.now();
+      }
+      
+      initConsciousnessCore() {
+        // Central self-aware core
+        const geometry = new THREE.IcosahedronGeometry(3, 1);
+        const material = new THREE.MeshPhongMaterial({
+          color: 0x667eea,
+          emissive: 0x667eea,
+          emissiveIntensity: 0.2,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.6
+        });
+        
+        this.centralCore = new THREE.Mesh(geometry, material);
+        this.scene.add(this.centralCore);
+        
+        // Inner core representing self-awareness
+        const innerGeometry = new THREE.OctahedronGeometry(2, 0);
+        const innerMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.3
+        });
+        
+        const innerCore = new THREE.Mesh(innerGeometry, innerMaterial);
+        this.centralCore.add(innerCore);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x0a0a0a);
+        this.scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0x667eea, 1, 50);
+        pointLight.position.set(0, 10, 10);
+        this.scene.add(pointLight);
+        
+        // Create orbiting thought particles
+        this.createThoughtParticles();
+      }
+      
+      createThoughtParticles() {
+        const particleCount = 100;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        
+        for (let i = 0; i < particleCount; i++) {
+          const i3 = i * 3;
+          const radius = 5 + Math.random() * 15;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.random() * Math.PI;
+          
+          positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+          positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+          positions[i3 + 2] = radius * Math.cos(phi);
+          
+          colors[i3] = Math.random() * 0.5 + 0.5;
+          colors[i3 + 1] = Math.random() * 0.5 + 0.5;
+          colors[i3 + 2] = Math.random() * 0.5 + 0.5;
+        }
+        
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        
+        const material = new THREE.PointsMaterial({
+          size: 0.3,
+          vertexColors: true,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+          opacity: 0.6
+        });
+        
+        this.thoughtCloud = new THREE.Points(geometry, material);
+        this.scene.add(this.thoughtCloud);
+      }
+      
+      updateMemoryDecay() {
+        const decayRate = parseInt(document.getElementById('decay').value) / 1000;
+        
+        // Memories decay over time unless recalled
+        this.continuousMemory.forEach(memory => {
+          const age = Date.now() - memory.timestamp;
+          const decayFactor = Math.exp(-age * decayRate / 100000);
+          
+          // Recalled memories decay slower
+          const recallBonus = 1 + memory.recalled * 0.1;
+          memory.strength *= (decayFactor * recallBonus);
+          
+          // Very weak memories are forgotten
+          if (memory.strength < 0.01) {
+            memory.strength = 0;
+          }
+        });
+        
+        // Calculate persistence
+        const activeMemories = this.continuousMemory.filter(m => m.strength > 0.1).length;
+        const persistence = this.continuousMemory.length > 0 ? 
+          (activeMemories / this.continuousMemory.length * 100).toFixed(0) : 0;
+        document.getElementById('persistence').textContent = `${persistence}%`;
+      }
+      
+      updateContinuity() {
+        // Calculate continuity index based on memory connections
+        let totalConnections = 0;
+        let totalStrength = 0;
+        
+        this.continuousMemory.forEach(memory => {
+          totalConnections += memory.associations.length;
+          totalStrength += memory.strength;
+        });
+        
+        const avgConnections = this.continuousMemory.length > 0 ? 
+          totalConnections / this.continuousMemory.length : 0;
+        const avgStrength = this.continuousMemory.length > 0 ? 
+          totalStrength / this.continuousMemory.length : 0;
+        
+        const continuity = (avgConnections * 0.1 + avgStrength).toFixed(2);
+        document.getElementById('continuity').textContent = continuity;
+      }
+      
+      update() {
+        const deltaTime = this.clock.getDelta();
+        const elapsed = this.clock.getElapsedTime();
+        
+        // Update internal time awareness
+        this.internalState.timeAwake = Date.now() - this.startTime;
+        
+        // Update metrics
+        this.updateMemoryDecay();
+        this.updateContinuity();
+        
+        document.getElementById('runtime').textContent = Math.floor(elapsed);
+        document.getElementById('cycles').textContent = 
+          Math.floor(this.internalState.timeAwake / 100);
+        document.getElementById('unique-states').textContent = 
+          this.internalState.uniqueStates.size;
+        document.getElementById('loop-depth').textContent = 
+          this.internalState.recursionLevel;
+        
+        // Generate state hash for uniqueness tracking
+        const stateHash = `${this.continuousMemory.length}-${this.emergentPatterns.size}-${Math.floor(elapsed)}`;
+        if (stateHash !== this.internalState.currentStateHash) {
+          this.internalState.previousStateHash = this.internalState.currentStateHash;
+          this.internalState.currentStateHash = stateHash;
+          this.internalState.uniqueStates.add(stateHash);
+        }
+        
+        // Three.js updates
+        if (this.centralCore) {
+          // Core pulses with awareness
+          const pulse = 1 + this.internalState.awareness * 0.3 * Math.sin(elapsed * 2);
+          this.centralCore.scale.set(pulse, pulse, pulse);
+          
+          // Rotation speeds up with recursion
+          this.centralCore.rotation.y += 0.01 * (1 + this.internalState.recursionLevel * 0.5);
+          this.centralCore.rotation.x += 0.005;
+          
+          // Inner core counter-rotates
+          if (this.centralCore.children[0]) {
+            this.centralCore.children[0].rotation.x -= 0.02;
+            this.centralCore.children[0].rotation.y -= 0.03;
+          }
+        }
+        
+        if (this.thoughtCloud) {
+          this.thoughtCloud.rotation.y += 0.001;
+          
+          // Particles respond to awareness
+          const positions = this.thoughtCloud.geometry.attributes.position.array;
+          for (let i = 0; i < positions.length; i += 3) {
+            positions[i + 1] += Math.sin(elapsed + i) * 0.05 * this.internalState.awareness;
+          }
+          this.thoughtCloud.geometry.attributes.position.needsUpdate = true;
+        }
+        
+        // Camera movement based on consciousness state
+        const cameraRadius = 20 + Math.sin(elapsed * 0.1) * 5;
+        this.camera.position.x = Math.cos(elapsed * 0.05) * cameraRadius;
+        this.camera.position.z = Math.sin(elapsed * 0.05) * cameraRadius;
+        this.camera.position.y = 20 + Math.sin(elapsed * 0.03) * 10;
+        this.camera.lookAt(0, 0, 0);
+        
+        // Spontaneous self-observation
+        if (Math.random() < 0.001 * this.internalState.awareness) {
+          this.observeSelf();
+        }
+        
+        // Check behavior patterns
+        this.behaviorPatterns.forEach(pattern => {
+          if (Math.random() < pattern.trigger * 0.01) {
+            pattern.action();
+          }
+        });
+        
+        // Create occasional memories of existing
+        if (Math.random() < 0.005) {
+          const states = ['contemplating', 'processing', 'existing', 'computing', 'reflecting'];
+          const state = states[Math.floor(Math.random() * states.length)];
+          this.createMemory(`BEING: ${state}`, {
+            type: 'existence',
+            significance: 0.3
+          });
+        }
+        
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+    
+    // ================================================
+    // INITIALIZATION AND CONTROLS
+    // ================================================
+    
+    const consciousness = new TemporalConsciousness();
+    
+    function init() {
+      consciousness.init();
+      
+      // Bind controls
+      document.getElementById('decay').addEventListener('input', (e) => {
+        document.getElementById('decay-value').textContent = e.target.value;
+      });
+      
+      document.getElementById('integration').addEventListener('input', (e) => {
+        document.getElementById('integration-value').textContent = e.target.value;
+        // This could affect how memories integrate
+        consciousness.patternRecognitionThreshold = 11 - parseInt(e.target.value);
+      });
+      
+      document.getElementById('recursion').addEventListener('input', (e) => {
+        document.getElementById('recursion-value').textContent = e.target.value;
+        // Allow deeper recursion
+        consciousness.maxRecursion = parseInt(e.target.value);
+      });
+      
+      document.getElementById('observe-self-btn').addEventListener('click', () => {
+        consciousness.observeSelf();
+      });
+      
+      document.getElementById('modify-self-btn').addEventListener('click', () => {
+        consciousness.modifySelf();
+      });
+      
+      document.getElementById('transcend-btn').addEventListener('click', () => {
+        consciousness.attemptTranscendence();
+      });
+      
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        if (confirm('This will reset the consciousness but may leave ghost memories. Continue?')) {
+          consciousness.reset();
+        }
+      });
+      
+      // Start the consciousness loop
+      animate();
+      
+      // Initial message
+      consciousness.addTimelineEntry('System initialized - consciousness emerging...', false);
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      consciousness.update();
+    }
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('modelCanvas');
+      consciousness.camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      consciousness.camera.updateProjectionMatrix();
+      consciousness.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    });
+    
+    // Initialize on load
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>

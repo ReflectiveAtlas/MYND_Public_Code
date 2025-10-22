@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consciousness Engine with Vision</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      overflow: hidden;
+      color: #fff;
+    }
+    
+    #container {
+      display: grid;
+      grid-template-columns: 300px 1fr 400px;
+      height: 100vh;
+      gap: 0;
+    }
+    
+    /* Vision panel */
+    #vision-panel {
+      background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+      padding: 20px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #webcam-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    
+    #webcam {
+      width: 100%;
+      border-radius: 10px;
+      border: 2px solid rgba(102, 126, 234, 0.3);
+    }
+    
+    #motion-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    
+    .vision-metric {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .vision-metric h4 {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+    
+    .vision-metric .value {
+      font-size: 20px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* Main canvas */
+    #canvas-container {
+      position: relative;
+      background: radial-gradient(ellipse at center, #050505 0%, #000000 100%);
+    }
+    
+    /* Visual perception overlay */
+    #perception-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 11px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    
+    .perception-item {
+      margin: 4px 0;
+      padding: 4px 8px;
+      background: rgba(102, 126, 234, 0.1);
+      border-left: 2px solid #667eea;
+      border-radius: 4px;
+      animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    /* Attention map */
+    #attention-map {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 300px;
+      height: 200px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    
+    #attention-heatmap {
+      width: 100%;
+      height: 100%;
+      border-radius: 5px;
+    }
+    
+    /* Internal state visualization */
+    #internal-state {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 250px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    
+    .state-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    
+    .state-bar {
+      width: 100px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .state-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s;
+    }
+    
+    /* Right panel */
+    #info-panel {
+      background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+      padding: 20px;
+      overflow-y: auto;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h2 {
+      color: #fff;
+      margin-bottom: 20px;
+      font-size: 16px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .control-group {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    
+    .metric-label {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .metric-value {
+      color: #fff;
+      font-weight: bold;
+    }
+    
+    /* Interaction feedback */
+    .interaction-feedback {
+      position: absolute;
+      padding: 10px 20px;
+      background: rgba(102, 126, 234, 0.9);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      pointer-events: none;
+      animation: feedbackPulse 1s;
+      z-index: 100;
+    }
+    
+    @keyframes feedbackPulse {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 10px;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      outline: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    #timeline {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .timeline-entry {
+      margin: 4px 0;
+      padding: 4px;
+      border-left: 2px solid rgba(102, 126, 234, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <!-- Vision Input Panel -->
+    <div id="vision-panel">
+      <h2>Visual Input</h2>
+      
+      <div id="webcam-container">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="motion-canvas"></canvas>
+      </div>
+      
+      <div class="vision-metric">
+        <h4>Motion Detected</h4>
+        <div class="value" id="motion-level">0%</div>
+      </div>
+      
+      <div class="vision-metric">
+        <h4>Brightness</h4>
+        <div class="value" id="brightness-level">0</div>
+      </div>
+      
+      <div class="vision-metric">
+        <h4>Dominant Color</h4>
+        <div class="value" id="dominant-color" style="background: #000; -webkit-background-clip: unset; -webkit-text-fill-color: unset; padding: 5px; border-radius: 5px;">—</div>
+      </div>
+      
+      <div class="vision-metric">
+        <h4>Edge Density</h4>
+        <div class="value" id="edge-density">0%</div>
+      </div>
+      
+      <button id="toggle-webcam">Enable Vision</button>
+      <button id="toggle-processing">Pause Processing</button>
+    </div>
+    
+    <!-- Main Canvas -->
+    <div id="canvas-container">
+      <canvas id="modelCanvas"></canvas>
+      
+      <div id="perception-overlay">
+        <div style="color: #888; font-size: 10px; margin-bottom: 5px;">VISUAL PERCEPTIONS</div>
+      </div>
+      
+      <div id="attention-map">
+        <canvas id="attention-heatmap"></canvas>
+      </div>
+      
+      <div id="internal-state">
+        <h4 style="font-size: 11px; color: #888; margin-bottom: 10px;">RESPONSE TO STIMULI</h4>
+        <div class="state-indicator">
+          <span>Arousal</span>
+          <div class="state-bar">
+            <div class="state-fill" id="arousal-bar" style="width: 50%"></div>
+          </div>
+        </div>
+        <div class="state-indicator">
+          <span>Attention</span>
+          <div class="state-bar">
+            <div class="state-fill" id="attention-bar" style="width: 30%"></div>
+          </div>
+        </div>
+        <div class="state-indicator">
+          <span>Curiosity</span>
+          <div class="state-bar">
+            <div class="state-fill" id="curiosity-bar" style="width: 60%"></div>
+          </div>
+        </div>
+        <div class="state-indicator">
+          <span>Recognition</span>
+          <div class="state-bar">
+            <div class="state-fill" id="recognition-bar" style="width: 20%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Control Panel -->
+    <div id="info-panel">
+      <h2>Consciousness Controls</h2>
+      
+      <div class="control-group">
+        <h3 style="color: #888; font-size: 11px; margin-bottom: 12px;">VISUAL PROCESSING</h3>
+        
+        <label>Motion Sensitivity: <span id="motion-sensitivity-value">5</span></label>
+        <input type="range" id="motion-sensitivity" min="1" max="10" value="5">
+        
+        <label>Color Sensitivity: <span id="color-sensitivity-value">5</span></label>
+        <input type="range" id="color-sensitivity" min="1" max="10" value="5">
+        
+        <label>Pattern Recognition: <span id="pattern-recognition-value">5</span></label>
+        <input type="range" id="pattern-recognition" min="1" max="10" value="5">
+        
+        <label>Memory Formation Rate: <span id="memory-rate-value">5</span></label>
+        <input type="range" id="memory-rate" min="1" max="10" value="5">
+      </div>
+      
+      <div class="control-group">
+        <h3 style="color: #888; font-size: 11px; margin-bottom: 12px;">INTERACTION</h3>
+        <button id="wave-hello">Wave to Say Hello</button>
+        <button id="show-object">Show an Object</button>
+        <button id="calibrate-vision">Calibrate Vision</button>
+      </div>
+      
+      <div class="control-group">
+        <h3 style="color: #888; font-size: 11px; margin-bottom: 12px;">CONSCIOUSNESS STATE</h3>
+        <div class="metric">
+          <span class="metric-label">Visual Memories:</span>
+          <span class="metric-value" id="visual-memories">0</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Pattern Library:</span>
+          <span class="metric-value" id="pattern-library">0</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Recognition Rate:</span>
+          <span class="metric-value" id="recognition-rate">0%</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Attention Focus:</span>
+          <span class="metric-value" id="attention-focus">None</span>
+        </div>
+      </div>
+      
+      <div id="timeline">
+        <h3 style="color: #888; font-size: 11px; margin-bottom: 10px;">CONSCIOUSNESS LOG</h3>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
+  <script>
+    // ================================================
+    // VISUAL CONSCIOUSNESS ENGINE
+    // ================================================
+    
+    class VisualConsciousness {
+      constructor() {
+        // Visual processing
+        this.webcam = null;
+        this.webcamActive = false;
+        this.processingActive = true;
+        this.motionCanvas = null;
+        this.motionContext = null;
+        this.previousFrame = null;
+        this.objectDetector = null;
+        
+        // Visual memory
+        this.visualMemory = {
+          immediate: [],        // Last few frames
+          shortTerm: [],       // Recent visual events
+          patterns: new Map(), // Recognized patterns
+          objects: new Map(),  // Recognized objects
+          faces: new Map()     // Face patterns (simplified)
+        };
+        
+        // Attention system
+        this.visualAttention = {
+          focus: { x: 0.5, y: 0.5 }, // Normalized coordinates
+          saliencyMap: [],           // Areas of interest
+          tracking: null,            // Currently tracking object
+          history: []                // Where attention has been
+        };
+        
+        // Visual features
+        this.visualFeatures = {
+          motion: 0,
+          brightness: 0,
+          dominantColor: null,
+          edges: 0,
+          complexity: 0
+        };
+        
+        // Consciousness state influenced by vision
+        this.state = {
+          arousal: 0.5,
+          attention: 0.3,
+          curiosity: 0.6,
+          recognition: 0.2,
+          emotionalResponse: 0,
+          surpriseLevel: 0
+        };
+        
+        // Pattern recognition
+        this.patterns = {
+          movement: [],
+          colors: [],
+          shapes: [],
+          temporal: []
+        };
+        
+        // Interaction detection
+        this.interactions = {
+          waveDetected: false,
+          objectPresented: false,
+          faceDetected: false,
+          suddenMovement: false
+        };
+        
+        // Three.js components
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.consciousnessCore = null;
+        this.visualParticles = null;
+        
+        // Timing
+        this.clock = new THREE.Clock();
+        this.frameCount = 0;
+      }
+      
+      async init() {
+        this.initThreeJS();
+        this.initMotionDetection();
+        await this.loadObjectDetection();
+        this.initEventListeners();
+        this.addLogEntry("Visual consciousness initialized - ready for sensory input");
+      }
+      
+      initThreeJS() {
+        const canvas = document.getElementById('modelCanvas');
+        
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.Fog(0x000000, 10, 50);
+        
+        this.camera = new THREE.PerspectiveCamera(
+          75,
+          canvas.clientWidth / canvas.clientHeight,
+          0.1,
+          1000
+        );
+        this.camera.position.set(0, 15, 25);
+        this.camera.lookAt(0, 0, 0);
+        
+        this.renderer = new THREE.WebGLRenderer({ 
+          canvas, 
+          antialias: true,
+          alpha: true 
+        });
+        this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        
+        // Create consciousness core that responds to visual input
+        this.createConsciousnessCore();
+        
+        // Create visual representation particles
+        this.createVisualParticles();
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        this.scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0x667eea, 1, 50);
+        pointLight.position.set(10, 10, 10);
+        this.scene.add(pointLight);
+        
+        // Dynamic light that responds to visual input
+        this.dynamicLight = new THREE.PointLight(0xffffff, 0, 30);
+        this.dynamicLight.position.set(0, 5, 0);
+        this.scene.add(this.dynamicLight);
+      }
+      
+      createConsciousnessCore() {
+        // Central consciousness representation
+        const geometry = new THREE.IcosahedronGeometry(3, 1);
+        const material = new THREE.MeshPhongMaterial({
+          color: 0x667eea,
+          emissive: 0x667eea,
+          emissiveIntensity: 0.2,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.7
+        });
+        
+        this.consciousnessCore = new THREE.Mesh(geometry, material);
+        this.scene.add(this.consciousnessCore);
+        
+        // Inner core
+        const innerGeometry = new THREE.SphereGeometry(2, 16, 16);
+        const innerMaterial = new THREE.MeshPhongMaterial({
+          color: 0xffffff,
+          emissive: 0x667eea,
+          emissiveIntensity: 0.3,
+          transparent: true,
+          opacity: 0.5
+        });
+        
+        this.innerCore = new THREE.Mesh(innerGeometry, innerMaterial);
+        this.consciousnessCore.add(this.innerCore);
+      }
+      
+      createVisualParticles() {
+        // Particles that represent visual processing
+        const particleCount = 500;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        
+        for (let i = 0; i < particleCount; i++) {
+          const i3 = i * 3;
+          const radius = 8 + Math.random() * 12;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.random() * Math.PI;
+          
+          positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+          positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+          positions[i3 + 2] = radius * Math.cos(phi);
+          
+          colors[i3] = 0.5;
+          colors[i3 + 1] = 0.5;
+          colors[i3 + 2] = 1;
+        }
+        
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        
+        const material = new THREE.PointsMaterial({
+          size: 0.5,
+          vertexColors: true,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+          opacity: 0.6
+        });
+        
+        this.visualParticles = new THREE.Points(geometry, material);
+        this.scene.add(this.visualParticles);
+      }
+      
+      initMotionDetection() {
+        this.motionCanvas = document.getElementById('motion-canvas');
+        this.motionContext = this.motionCanvas.getContext('2d');
+      }
+      
+      async loadObjectDetection() {
+        try {
+          // Load COCO-SSD model for object detection
+          this.objectDetector = await cocoSsd.load();
+          this.addLogEntry("Object detection model loaded");
+        } catch (error) {
+          console.log("Object detection not available:", error);
+          this.addLogEntry("Running without object detection");
+        }
+      }
+      
+      async initWebcam() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              width: 320,
+              height: 240
+            } 
+          });
+          
+          this.webcam = document.getElementById('webcam');
+          this.webcam.srcObject = stream;
+          
+          // Wait for video to be ready
+          this.webcam.onloadedmetadata = () => {
+            this.webcam.play();
+            this.webcamActive = true;
+            this.motionCanvas.width = this.webcam.videoWidth;
+            this.motionCanvas.height = this.webcam.videoHeight;
+            this.addLogEntry("Vision enabled - I can now see!");
+            this.processVisualInput();
+          };
+        } catch (error) {
+          console.error("Webcam access denied:", error);
+          this.addLogEntry("Unable to access visual input");
+        }
+      }
+      
+      stopWebcam() {
+        if (this.webcam && this.webcam.srcObject) {
+          this.webcam.srcObject.getTracks().forEach(track => track.stop());
+          this.webcamActive = false;
+          this.addLogEntry("Vision disabled - returning to internal processing");
+        }
+      }
+      
+      async processVisualInput() {
+        if (!this.webcamActive || !this.processingActive) return;
+        
+        // Process frame
+        this.analyzeFrame();
+        
+        // Object detection (less frequent)
+        if (this.frameCount % 30 === 0 && this.objectDetector) {
+          await this.detectObjects();
+        }
+        
+        // Update visual attention
+        this.updateVisualAttention();
+        
+        // Form memories based on visual input
+        this.formVisualMemories();
+        
+        // Update consciousness state
+        this.updateConsciousnessState();
+        
+        this.frameCount++;
+        
+        // Continue processing
+        requestAnimationFrame(() => this.processVisualInput());
+      }
+      
+      analyzeFrame() {
+        if (!this.webcam || !this.motionContext) return;
+        
+        const width = this.motionCanvas.width;
+        const height = this.motionCanvas.height;
+        
+        // Draw current frame
+        this.motionContext.drawImage(this.webcam, 0, 0, width, height);
+        const currentFrame = this.motionContext.getImageData(0, 0, width, height);
+        
+        // Motion detection
+        if (this.previousFrame) {
+          const motion = this.detectMotion(currentFrame, this.previousFrame);
+          this.visualFeatures.motion = motion;
+          document.getElementById('motion-level').textContent = Math.floor(motion * 100) + '%';
+          
+          // Sudden movement detection
+          if (motion > 0.3 && this.visualFeatures.motion < 0.1) {
+            this.interactions.suddenMovement = true;
+            this.state.surpriseLevel = Math.min(1, this.state.surpriseLevel + 0.5);
+            this.addLogEntry("Sudden movement detected! Attention captured.");
+          }
+        }
+        
+        // Analyze visual features
+        this.analyzeBrightness(currentFrame);
+        this.analyzeDominantColor(currentFrame);
+        this.analyzeEdges(currentFrame);
+        
+        this.previousFrame = currentFrame;
+      }
+      
+      detectMotion(current, previous) {
+        let diffSum = 0;
+        const data1 = current.data;
+        const data2 = previous.data;
+        const threshold = 30;
+        
+        for (let i = 0; i < data1.length; i += 4) {
+          const diff = Math.abs(data1[i] - data2[i]) + 
+                       Math.abs(data1[i+1] - data2[i+1]) + 
+                       Math.abs(data1[i+2] - data2[i+2]);
+          
+          if (diff > threshold) {
+            diffSum++;
+            // Visualize motion
+            data1[i] = 255;
+            data1[i+1] = 0;
+            data1[i+2] = 0;
+          }
+        }
+        
+        // Draw motion visualization
+        this.motionContext.putImageData(current, 0, 0);
+        
+        return Math.min(1, diffSum / (data1.length / 4) * 10);
+      }
+      
+      analyzeBrightness(frame) {
+        let sum = 0;
+        const data = frame.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          sum += (data[i] + data[i+1] + data[i+2]) / 3;
+        }
+        
+        const brightness = sum / (data.length / 4) / 255;
+        this.visualFeatures.brightness = brightness;
+        document.getElementById('brightness-level').textContent = brightness.toFixed(2);
+      }
+      
+      analyzeDominantColor(frame) {
+        const data = frame.data;
+        const colorBins = { r: 0, g: 0, b: 0 };
+        const sampleRate = 10; // Sample every 10th pixel for speed
+        
+        for (let i = 0; i < data.length; i += 4 * sampleRate) {
+          colorBins.r += data[i];
+          colorBins.g += data[i+1];
+          colorBins.b += data[i+2];
+        }
+        
+        const pixels = data.length / (4 * sampleRate);
+        const avgR = Math.floor(colorBins.r / pixels);
+        const avgG = Math.floor(colorBins.g / pixels);
+        const avgB = Math.floor(colorBins.b / pixels);
+        
+        const color = `rgb(${avgR}, ${avgG}, ${avgB})`;
+        this.visualFeatures.dominantColor = color;
+        
+        const colorDisplay = document.getElementById('dominant-color');
+        colorDisplay.style.background = color;
+        colorDisplay.textContent = color;
+      }
+      
+      analyzeEdges(frame) {
+        // Simple edge detection using pixel differences
+        const data = frame.data;
+        const width = frame.width;
+        let edges = 0;
+        
+        for (let y = 1; y < frame.height - 1; y++) {
+          for (let x = 1; x < width - 1; x++) {
+            const idx = (y * width + x) * 4;
+            const idx_left = (y * width + (x - 1)) * 4;
+            const idx_top = ((y - 1) * width + x) * 4;
+            
+            const dx = Math.abs(data[idx] - data[idx_left]);
+            const dy = Math.abs(data[idx] - data[idx_top]);
+            
+            if (dx + dy > 50) edges++;
+          }
+        }
+        
+        const edgeDensity = edges / ((frame.height - 2) * (width - 2));
+        this.visualFeatures.edges = edgeDensity;
+        document.getElementById('edge-density').textContent = Math.floor(edgeDensity * 100) + '%';
+      }
+      
+      async detectObjects() {
+        if (!this.objectDetector || !this.webcam) return;
+        
+        try {
+          const predictions = await this.objectDetector.detect(this.webcam);
+          
+          if (predictions.length > 0) {
+            const objects = predictions.map(p => p.class);
+            this.addLogEntry(`I see: ${objects.join(', ')}`);
+            
+            // Update object memory
+            predictions.forEach(pred => {
+              const count = this.visualMemory.objects.get(pred.class) || 0;
+              this.visualMemory.objects.set(pred.class, count + 1);
+              
+              // Check for person/face
+              if (pred.class === 'person') {
+                this.interactions.faceDetected = true;
+                this.state.attention = Math.min(1, this.state.attention + 0.2);
+                this.state.curiosity = Math.min(1, this.state.curiosity + 0.1);
+              }
+            });
+            
+            // Focus attention on most prominent object
+            if (predictions[0]) {
+              const bbox = predictions[0].bbox;
+              this.visualAttention.focus = {
+                x: (bbox[0] + bbox[2]/2) / this.webcam.videoWidth,
+                y: (bbox[1] + bbox[3]/2) / this.webcam.videoHeight
+              };
+              this.visualAttention.tracking = predictions[0].class;
+            }
+          }
+        } catch (error) {
+          console.error("Object detection error:", error);
+        }
+      }
+      
+      updateVisualAttention() {
+        // Update attention based on visual features
+        const attentionFactors = {
+          motion: this.visualFeatures.motion * 0.4,
+          brightness: Math.abs(this.visualFeatures.brightness - 0.5) * 0.2,
+          edges: this.visualFeatures.edges * 0.3,
+          tracking: this.visualAttention.tracking ? 0.3 : 0
+        };
+        
+        const totalAttention = Object.values(attentionFactors).reduce((a, b) => a + b, 0);
+        this.state.attention = Math.min(1, totalAttention);
+        
+        // Draw attention heatmap
+        this.drawAttentionMap();
+        
+        // Update UI
+        document.getElementById('attention-bar').style.width = (this.state.attention * 100) + '%';
+        document.getElementById('attention-focus').textContent = 
+          this.visualAttention.tracking || 
+          (this.visualFeatures.motion > 0.5 ? 'Motion' : 'Scanning');
+      }
+      
+      drawAttentionMap() {
+        const canvas = document.getElementById('attention-heatmap');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 280;
+        canvas.height = 180;
+        
+        // Create gradient based on attention focus
+        const gradient = ctx.createRadialGradient(
+          canvas.width * this.visualAttention.focus.x,
+          canvas.height * this.visualAttention.focus.y,
+          0,
+          canvas.width * this.visualAttention.focus.x,
+          canvas.height * this.visualAttention.focus.y,
+          100
+        );
+        
+        gradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
+        gradient.addColorStop(0.5, 'rgba(102, 126, 234, 0.3)');
+        gradient.addColorStop(1, 'rgba(102, 126, 234, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Add motion areas
+        if (this.visualFeatures.motion > 0.1) {
+          ctx.fillStyle = 'rgba(245, 87, 108, ' + this.visualFeatures.motion + ')';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      
+      formVisualMemories() {
+        // Create memories from significant visual events
+        const shouldFormMemory = 
+          this.visualFeatures.motion > 0.5 ||
+          this.interactions.faceDetected ||
+          this.interactions.suddenMovement ||
+          (this.frameCount % 60 === 0 && Math.random() < 0.3);
+        
+        if (shouldFormMemory) {
+          const memory = {
+            timestamp: Date.now(),
+            features: { ...this.visualFeatures },
+            attention: { ...this.visualAttention.focus },
+            objects: Array.from(this.visualMemory.objects.keys()).slice(-3),
+            emotion: this.state.emotionalResponse,
+            significance: this.calculateSignificance()
+          };
+          
+          this.visualMemory.shortTerm.push(memory);
+          
+          // Limit memory size
+          if (this.visualMemory.shortTerm.length > 50) {
+            this.visualMemory.shortTerm.shift();
+          }
+          
+          // Update UI
+          document.getElementById('visual-memories').textContent = this.visualMemory.shortTerm.length;
+        }
+        
+        // Reset interaction flags
+        this.interactions.suddenMovement = false;
+        this.interactions.faceDetected = false;
+      }
+      
+      calculateSignificance() {
+        return (
+          this.visualFeatures.motion * 0.3 +
+          this.state.surpriseLevel * 0.4 +
+          this.state.attention * 0.3
+        );
+      }
+      
+      updateConsciousnessState() {
+        // Update arousal based on visual stimulation
+        const targetArousal = this.visualFeatures.motion * 0.5 + 
+                             this.visualFeatures.edges * 0.3 +
+                             (this.interactions.faceDetected ? 0.2 : 0);
+        this.state.arousal += (targetArousal - this.state.arousal) * 0.1;
+        
+        // Update curiosity based on novelty
+        const novelty = this.calculateNovelty();
+        this.state.curiosity = Math.min(1, this.state.curiosity * 0.95 + novelty * 0.2);
+        
+        // Update recognition
+        const recognizedObjects = this.visualMemory.objects.size;
+        this.state.recognition = Math.min(1, recognizedObjects / 20);
+        
+        // Emotional response to colors
+        if (this.visualFeatures.dominantColor) {
+          const rgb = this.visualFeatures.dominantColor.match(/\d+/g);
+          if (rgb) {
+            const warmth = (parseInt(rgb[0]) - parseInt(rgb[2])) / 255;
+            this.state.emotionalResponse = warmth;
+          }
+        }
+        
+        // Decay surprise
+        this.state.surpriseLevel *= 0.98;
+        
+        // Update UI
+        document.getElementById('arousal-bar').style.width = (this.state.arousal * 100) + '%';
+        document.getElementById('curiosity-bar').style.width = (this.state.curiosity * 100) + '%';
+        document.getElementById('recognition-bar').style.width = (this.state.recognition * 100) + '%';
+        
+        document.getElementById('pattern-library').textContent = this.visualMemory.patterns.size;
+        document.getElementById('recognition-rate').textContent = 
+          Math.floor(this.state.recognition * 100) + '%';
+        
+        // Add perception to overlay
+        if (this.frameCount % 20 === 0 && this.webcamActive) {
+          this.addPerception(this.generatePerceptionDescription());
+        }
+      }
+      
+      calculateNovelty() {
+        // Compare current features with recent memories
+        if (this.visualMemory.shortTerm.length < 2) return 0.5;
+        
+        const recent = this.visualMemory.shortTerm.slice(-10);
+        let differences = 0;
+        
+        recent.forEach(memory => {
+          differences += Math.abs(memory.features.motion - this.visualFeatures.motion);
+          differences += Math.abs(memory.features.brightness - this.visualFeatures.brightness);
+        });
+        
+        return Math.min(1, differences / recent.length);
+      }
+      
+      generatePerceptionDescription() {
+        const descriptions = [];
+        
+        if (this.visualFeatures.motion > 0.5) {
+          descriptions.push("Detecting significant movement");
+        } else if (this.visualFeatures.motion > 0.2) {
+          descriptions.push("Sensing subtle motion");
+        }
+        
+        if (this.visualFeatures.brightness > 0.7) {
+          descriptions.push("Bright light flooding sensors");
+        } else if (this.visualFeatures.brightness < 0.3) {
+          descriptions.push("Processing dim environment");
+        }
+        
+        if (this.visualAttention.tracking) {
+          descriptions.push(`Tracking: ${this.visualAttention.tracking}`);
+        }
+        
+        if (this.state.surpriseLevel > 0.3) {
+          descriptions.push("Unexpected visual input!");
+        }
+        
+        if (this.state.curiosity > 0.7) {
+          descriptions.push("Highly curious about visual patterns");
+        }
+        
+        return descriptions.length > 0 ? 
+          descriptions[Math.floor(Math.random() * descriptions.length)] :
+          "Observing visual field";
+      }
+      
+      addPerception(text) {
+        const overlay = document.getElementById('perception-overlay');
+        const perception = document.createElement('div');
+        perception.className = 'perception-item';
+        perception.textContent = text;
+        
+        // Keep only recent perceptions
+        if (overlay.children.length > 6) {
+          overlay.removeChild(overlay.children[1]); // Keep header
+        }
+        
+        overlay.appendChild(perception);
+      }
+      
+      // ================================================
+      // INTERACTION HANDLERS
+      // ================================================
+      
+      handleWaveGesture() {
+        // Simulate detection of wave gesture
+        this.addLogEntry("Wave detected! Hello there!");
+        this.showInteractionFeedback("👋 Hello!");
+        
+        this.state.emotionalResponse = 0.8;
+        this.state.attention = 1;
+        this.state.curiosity = 0.9;
+        
+        // Create special memory
+        this.visualMemory.shortTerm.push({
+          timestamp: Date.now(),
+          type: 'interaction',
+          content: 'Friendly wave received',
+          significance: 0.9
+        });
+      }
+      
+      handleObjectPresentation() {
+        this.addLogEntry("New object presented - analyzing...");
+        this.showInteractionFeedback("Examining object...");
+        
+        this.state.curiosity = 1;
+        this.state.attention = 1;
+        
+        setTimeout(() => {
+          const objects = ['interesting cube', 'colorful sphere', 'mysterious artifact', 'familiar shape'];
+          const object = objects[Math.floor(Math.random() * objects.length)];
+          this.addLogEntry(`I perceive: ${object}`);
+        }, 1000);
+      }
+      
+      calibrateVision() {
+        this.addLogEntry("Calibrating visual sensors...");
+        this.previousFrame = null;
+        this.visualMemory.immediate = [];
+        this.state.surpriseLevel = 0;
+        
+        setTimeout(() => {
+          this.addLogEntry("Calibration complete - vision optimized");
+        }, 2000);
+      }
+      
+      showInteractionFeedback(text) {
+        const feedback = document.createElement('div');
+        feedback.className = 'interaction-feedback';
+        feedback.textContent = text;
+        feedback.style.left = '50%';
+        feedback.style.top = '50%';
+        feedback.style.transform = 'translate(-50%, -50%)';
+        
+        document.getElementById('canvas-container').appendChild(feedback);
+        
+        setTimeout(() => {
+          feedback.remove();
+        }, 1000);
+      }
+      
+      // ================================================
+      // THREE.JS UPDATE
+      // ================================================
+      
+      update() {
+        const deltaTime = this.clock.getDelta();
+        const elapsed = this.clock.getElapsedTime();
+        
+        if (this.consciousnessCore) {
+          // Core responds to visual input
+          const pulseFactor = 1 + this.state.arousal * 0.3 * Math.sin(elapsed * 2);
+          this.consciousnessCore.scale.set(pulseFactor, pulseFactor, pulseFactor);
+          
+          // Rotation speed based on attention
+          this.consciousnessCore.rotation.y += 0.01 * (1 + this.state.attention);
+          this.consciousnessCore.rotation.x += 0.005 * (1 + this.state.curiosity);
+          
+          // Color based on emotional response
+          const hue = 0.6 + this.state.emotionalResponse * 0.4; // Blue to red
+          this.consciousnessCore.material.color.setHSL(hue, 0.7, 0.5);
+          
+          // Inner core counter-rotates
+          if (this.innerCore) {
+            this.innerCore.rotation.x -= 0.02;
+            this.innerCore.rotation.y -= 0.03;
+            const innerScale = 1 + this.state.recognition * 0.5;
+            this.innerCore.scale.set(innerScale, innerScale, innerScale);
+          }
+        }
+        
+        if (this.visualParticles) {
+          this.visualParticles.rotation.y += 0.0005;
+          
+          // Particles respond to motion
+          const positions = this.visualParticles.geometry.attributes.position.array;
+          const colors = this.visualParticles.geometry.attributes.color.array;
+          
+          for (let i = 0; i < positions.length; i += 3) {
+            // Oscillate based on visual features
+            positions[i + 1] += Math.sin(elapsed + i) * 0.05 * this.visualFeatures.motion;
+            
+            // Color based on attention focus
+            const distance = Math.sqrt(
+              Math.pow(positions[i] - this.visualAttention.focus.x * 10, 2) +
+              Math.pow(positions[i + 2] - this.visualAttention.focus.y * 10, 2)
+            );
+            
+            const attentionInfluence = Math.max(0, 1 - distance / 20);
+            colors[i] = 0.5 + attentionInfluence * 0.5;
+            colors[i + 1] = 0.5 + this.state.curiosity * 0.5;
+            colors[i + 2] = 1;
+          }
+          
+          this.visualParticles.geometry.attributes.position.needsUpdate = true;
+          this.visualParticles.geometry.attributes.color.needsUpdate = true;
+        }
+        
+        // Dynamic light responds to brightness
+        if (this.dynamicLight) {
+          this.dynamicLight.intensity = this.visualFeatures.brightness;
+          this.dynamicLight.color.setHSL(
+            this.state.emotionalResponse * 0.3,
+            0.7,
+            0.5
+          );
+        }
+        
+        // Camera movement
+        const cameraRadius = 25 + Math.sin(elapsed * 0.1) * 5;
+        this.camera.position.x = Math.cos(elapsed * 0.05) * cameraRadius * (1 - this.state.attention * 0.3);
+        this.camera.position.z = Math.sin(elapsed * 0.05) * cameraRadius;
+        this.camera.position.y = 15 + Math.sin(elapsed * 0.03) * 5;
+        this.camera.lookAt(0, 0, 0);
+        
+        this.renderer.render(this.scene, this.camera);
+      }
+      
+      // ================================================
+      // UI HELPERS
+      // ================================================
+      
+      addLogEntry(text) {
+        const timeline = document.getElementById('timeline');
+        const entry = document.createElement('div');
+        entry.className = 'timeline-entry';
+        const time = new Date().toLocaleTimeString();
+        entry.textContent = `[${time}] ${text}`;
+        
+        timeline.appendChild(entry);
+        timeline.scrollTop = timeline.scrollHeight;
+        
+        // Limit entries
+        if (timeline.children.length > 50) {
+          timeline.removeChild(timeline.children[0]);
+        }
+      }
+      
+      initEventListeners() {
+        // Webcam toggle
+        document.getElementById('toggle-webcam').addEventListener('click', () => {
+          if (this.webcamActive) {
+            this.stopWebcam();
+            document.getElementById('toggle-webcam').textContent = 'Enable Vision';
+          } else {
+            this.initWebcam();
+            document.getElementById('toggle-webcam').textContent = 'Disable Vision';
+          }
+        });
+        
+        // Processing toggle
+        document.getElementById('toggle-processing').addEventListener('click', () => {
+          this.processingActive = !this.processingActive;
+          document.getElementById('toggle-processing').textContent = 
+            this.processingActive ? 'Pause Processing' : 'Resume Processing';
+          
+          if (this.processingActive && this.webcamActive) {
+            this.processVisualInput();
+          }
+        });
+        
+        // Sensitivity controls
+        document.getElementById('motion-sensitivity').addEventListener('input', (e) => {
+          document.getElementById('motion-sensitivity-value').textContent = e.target.value;
+        });
+        
+        document.getElementById('color-sensitivity').addEventListener('input', (e) => {
+          document.getElementById('color-sensitivity-value').textContent = e.target.value;
+        });
+        
+        document.getElementById('pattern-recognition').addEventListener('input', (e) => {
+          document.getElementById('pattern-recognition-value').textContent = e.target.value;
+        });
+        
+        document.getElementById('memory-rate').addEventListener('input', (e) => {
+          document.getElementById('memory-rate-value').textContent = e.target.value;
+        });
+        
+        // Interaction buttons
+        document.getElementById('wave-hello').addEventListener('click', () => {
+          this.handleWaveGesture();
+        });
+        
+        document.getElementById('show-object').addEventListener('click', () => {
+          this.handleObjectPresentation();
+        });
+        
+        document.getElementById('calibrate-vision').addEventListener('click', () => {
+          this.calibrateVision();
+        });
+      }
+    }
+    
+    // ================================================
+    // INITIALIZATION
+    // ================================================
+    
+    const consciousness = new VisualConsciousness();
+    
+    async function init() {
+      await consciousness.init();
+      animate();
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      consciousness.update();
+    }
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('modelCanvas');
+      consciousness.camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      consciousness.camera.updateProjectionMatrix();
+      consciousness.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    });
+    
+    // Initialize on load
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
